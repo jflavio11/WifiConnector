@@ -6,7 +6,7 @@
 ### Requirements
 * API > 16
 
-### Instalation
+## Instalation
 **Using Gradle**
 
 Add this on your project build.gradle
