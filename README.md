@@ -7,7 +7,7 @@
 * API > 16
 
 ### Instalation
-***Using Gradle***
+**Using Gradle**
 Add this on your project build.gradle
 ```
 allprojects {
@@ -22,3 +22,25 @@ dependences{
 	compile 'com.jflavio1.wificonnector:wifi-connector:1.0'
 	}
 ```
+
+### Example
+```
+	// third and fith parameters could be null
+	WifiConnector connector = new WifiConnector(this, "NEW_SSID", "NEW_BSSID", "WEP", "wifiPassword");
+	connector.connectToWifi(new WifiConnector.ConnectionResultListener() {
+	    @Override
+	    public void successfulConnect() {
+	        Toast.makeText(getApplicationContext(), "Successfuly connection to wifi!", Toast.LENGTH_SHORT).show();
+	    }
+
+	    @Override
+	    public void errorConnect(int codeReason) {
+	        Toast.makeText(getApplicationContext(), "There was an error connecting to wifi...", Toast.LENGTH_SHORT).show();
+	    }
+	});
+```
+
+### Important!
+**WifiConnector class must be implemented on Service or IntentService**
+
+All tests and suggestions are well received.
