@@ -43,6 +43,7 @@ dependences{
 
 ### TODO
 * check if new ssid is the current wifi network
+* scan wifi networks functionality
 
 ### Important!
 **WifiConnector instance must be implemented on Service or IntentService**
