@@ -64,7 +64,6 @@ public class WifiConnector {
 
     public static final int AUTHENTICATION_ERROR = 111;
     public static final int NOT_FOUND_ERROR      = 222;
-    public static final int SUCCESS_CONNECTION   = 333;
     public static final int SAME_NETWORK         = 444;
 
     /**
@@ -78,9 +77,10 @@ public class WifiConnector {
     }
 
     public WifiConnector(WifiConfiguration wifiConfiguration, Context context) {
-        this.wifiConfiguration = wifiConfiguration;
         this.context = context;
         this.wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        this.wifiConfiguration = wifiConfiguration;
+
     }
 
     public WifiConnector(Context context, String SSID, @Nullable String BSSID, String securityType, @Nullable String password){
@@ -114,11 +114,18 @@ public class WifiConnector {
         }
     }
 
+    private boolean isAlreadyConnected(String SSID){
+        if(wifiManager.getConnectionInfo().getSSID().equals(SSID)){
+            return true;
+        }
+        return false;
+    }
+
     private void createBroadcastListener(){
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         receiverWifi = new WifiReceiver();
-        try{this.context.registerReceiver(receiverWifi, mIntentFilter);}catch (Exception ignored){}
+        try{this.context.registerReceiver(receiverWifi, mIntentFilter);}catch (Exception e){wifiLog("Register broadcast error: " + e.toString());}
     }
 
     /**
@@ -127,9 +134,13 @@ public class WifiConnector {
      */
     public void connectToWifi(ConnectionResultListener connectionResultListener){
         this.connectionResultListener = connectionResultListener;
-        connectToWifi();
-        createBroadcastListener();
-        wifiManager.reconnect();
+        if(isAlreadyConnected(quoteFormat(wifiConfiguration.SSID))){
+            connectionResultListener.errorConnect(SAME_NETWORK);
+        }else {
+            createBroadcastListener();
+            connectToWifi();
+            wifiManager.reconnect();
+        }
     }
 
     /**
@@ -158,7 +169,7 @@ public class WifiConnector {
         confList = wifiManager.getConfiguredNetworks();
         if (confList != null && confList.size() > 0) {
             for (WifiConfiguration existingConfig : confList) {
-                if (trimQuotes(existingConfig.SSID).equals(trimQuotes(SSID))) {
+                if (quoteFormat(existingConfig.SSID).equals(quoteFormat(SSID))) {
                     return existingConfig.networkId;
                 }
             }
@@ -187,7 +198,7 @@ public class WifiConnector {
         return str;
     }
 
-    private static String trimQuotes(String str) {
+    private static String quoteFormat(String str) {
         if (!str.isEmpty()) {
             return str.replaceAll("^\"*", "").replaceAll("\"*$", "");
         }
@@ -213,7 +224,7 @@ public class WifiConnector {
     }
 
     private void wifiLog(String text){
-        Log.d(TAG, "WifiConnector: " + text);
+        Log.d(TAG, text);
     }
 
     private class WifiReceiver extends BroadcastReceiver {
@@ -221,22 +232,30 @@ public class WifiConnector {
         public void onReceive(Context c, Intent intent) {
             String action  = intent.getAction();
             if(action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)){
-                SupplicantState supl_state=((SupplicantState)intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE));
 
-                if(supl_state.equals(SupplicantState.COMPLETED)){
-                    String bssid = intent.getParcelableExtra(WifiManager.EXTRA_BSSID);
-                    wifiLog("wifiManager completed connection");
-                    wifiManager.saveConfiguration();
-                    context.unregisterReceiver(receiverWifi);
-                    connectionResultListener.successfulConnect();
-                }else if(supl_state.equals(SupplicantState.DISCONNECTED)){
-                    int supl_error = intent.getIntExtra(WifiManager.EXTRA_SUPPLICANT_ERROR, -1);
-                    if(supl_error == WifiManager.ERROR_AUTHENTICATING){
-                        wifiLog("wifiManager authentication error");
+                SupplicantState state = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
+
+                switch (state){
+                    case COMPLETED:
+                        String bssid = intent.getStringExtra(WifiManager.EXTRA_BSSID);
+                        wifiLog("Connection to Wifi was successfuly completed...\n" +
+                                "Connected to bssid: " + bssid );
+                        connectionResultListener.successfulConnect();
                         context.unregisterReceiver(receiverWifi);
-                        connectionResultListener.errorConnect(AUTHENTICATION_ERROR);
-                        deleteWifiConf();
-                    }
+                        break;
+                    case DISCONNECTED:
+                        wifiLog("Disconnected...");
+                        int supl_error = intent.getIntExtra(WifiManager.EXTRA_SUPPLICANT_ERROR, -1);
+                        if(supl_error == WifiManager.ERROR_AUTHENTICATING){
+                            wifiLog("Authentication error...");
+                            context.unregisterReceiver(receiverWifi);
+                            connectionResultListener.errorConnect(AUTHENTICATION_ERROR);
+                            deleteWifiConf();
+                        }
+                        break;
+                    case AUTHENTICATING:
+                        wifiLog("Authenticating...");
+                        break;
                 }
 
 
