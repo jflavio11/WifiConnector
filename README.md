@@ -8,6 +8,7 @@
 
 ### Instalation
 **Using Gradle**
+
 Add this on your project build.gradle
 ```
 allprojects {
@@ -40,7 +41,10 @@ dependences{
 	});
 ```
 
+### TODO
+* check if new ssid is the current wifi network
+
 ### Important!
-**WifiConnector class must be implemented on Service or IntentService**
+**WifiConnector instance must be implemented on Service or IntentService**
 
 All tests and suggestions are well received.
