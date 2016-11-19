@@ -5,23 +5,24 @@
 
 ### Requirements
 * API > 16
+* Since Android 6, you are able to configure WifiNetworks that your app has created, **you cannot** edit wifi configurations from others apps.
 
 ## Instalation
 **Using Gradle**
 
-Add this on your project build.gradle
-```
-allprojects {
-    repositories {
-        maven { url "http://jofani.bintray.com/Wifi-connector" }
-    }
-}
-```
 And this to your app build.gradle
 ```
-dependences{
-	compile 'com.jflavio1.wificonnector:wifi-connector:1.0'
-	}
+compile 'com.jflavio1.wificonnector:wifi-connector:1.1'
+```
+
+**Using Maven**
+```
+<dependency> 
+	<groupId>com.jflavio1.wificonnector</groupId> 
+	<artifactId>wifi-connector</artifactId> 
+	<version>1.0</version> 
+	<type>pom</type> 
+</dependency>
 ```
 
 ### Example
@@ -42,10 +43,14 @@ dependences{
 ```
 
 ### TODO
-* check if new ssid is the current wifi network
 * scan wifi networks functionality
 
 ### Important!
 **WifiConnector instance must be implemented on Service or IntentService**
+Remember, you have to put these permissions on your Manifest:
+```
+<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+```
 
 All tests and suggestions are well received.
