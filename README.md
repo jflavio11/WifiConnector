@@ -12,7 +12,7 @@
 
 And this to your app build.gradle
 ```
-compile 'com.jflavio1.wificonnector:wifi-connector:1.1'
+compile 'com.jflavio1.wificonnector:wifi-connector:1.2'
 ```
 
 **Using Maven**
@@ -20,7 +20,7 @@ compile 'com.jflavio1.wificonnector:wifi-connector:1.1'
 <dependency> 
 	<groupId>com.jflavio1.wificonnector</groupId> 
 	<artifactId>wifi-connector</artifactId> 
-	<version>1.0</version> 
+	<version>1.2</version> 
 	<type>pom</type> 
 </dependency>
 ```
@@ -42,8 +42,6 @@ compile 'com.jflavio1.wificonnector:wifi-connector:1.1'
 	});
 ```
 
-### TODO
-* scan wifi networks functionality
 
 ### Important!
 **WifiConnector instance must be implemented on Service or IntentService**
