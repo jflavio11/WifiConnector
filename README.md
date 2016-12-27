@@ -7,24 +7,6 @@
 * API > 16
 * Since Android 6, you are able to configure WifiNetworks that your app has created, **you cannot** edit wifi configurations from others apps.
 
-## Instalation
-**Using Gradle**
-
-And this to your app build.gradle
-```
-compile 'com.jflavio1.wificonnector:wifi-connector:1.2'
-```
-
-**Using Maven**
-```
-<dependency> 
-	<groupId>com.jflavio1.wificonnector</groupId> 
-	<artifactId>wifi-connector</artifactId> 
-	<version>1.2</version> 
-	<type>pom</type> 
-</dependency>
-```
-
 ### Example
 ```
 	// third and fith parameters could be null
