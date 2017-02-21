@@ -24,7 +24,7 @@
 
                 @Override
                 public void onStateChange(SupplicantState supplicantState) {
-		    // update UI!
+			// update UI!
                 }
 	});
 ```
