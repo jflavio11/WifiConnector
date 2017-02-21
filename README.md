@@ -13,14 +13,19 @@
 	WifiConnector connector = new WifiConnector(this, "NEW_SSID", "NEW_BSSID", "WEP", "wifiPassword");
 	connector.connectToWifi(new WifiConnector.ConnectionResultListener() {
 	    @Override
-	    public void successfulConnect() {
-	        Toast.makeText(getApplicationContext(), "Successfuly connection to wifi!", Toast.LENGTH_SHORT).show();
-	    }
+                public void successfulConnect(String SSID) {
+                    // toast!
+                }
 
-	    @Override
-	    public void errorConnect(int codeReason) {
-	        Toast.makeText(getApplicationContext(), "There was an error connecting to wifi...", Toast.LENGTH_SHORT).show();
-	    }
+                @Override
+                public void errorConnect(int codeReason) {
+                    // toast!
+                }
+
+                @Override
+                public void onStateChange(SupplicantState supplicantState) {
+		    // update UI!
+                }
 	});
 ```
 
