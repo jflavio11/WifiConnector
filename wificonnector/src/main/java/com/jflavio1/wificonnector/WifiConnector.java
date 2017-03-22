@@ -135,6 +135,14 @@ public class WifiConnector {
      * String value for current connected Wi-Fi network
      */
     public String currentWifiBSSID  = null;
+    
+    public WifiConnector(Context context, boolean enableWifi) {
+        this.context = context;
+        this.wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        if(enableWifi){
+            enableWifi();
+        }
+    }
 
     public WifiConnector(Context context) {
         this.context = context;
