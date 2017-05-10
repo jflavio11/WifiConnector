@@ -13,6 +13,10 @@ import android.net.wifi.WifiManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.jflavio1.wificonnector.interfaces.ConnectionResultListener;
+import com.jflavio1.wificonnector.interfaces.RemoveWifiListener;
+import com.jflavio1.wificonnector.interfaces.ShowWifiListener;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,12 +27,15 @@ import java.util.List;
 
 /**
  * Created by JoseFlavio on 17/11/2016.
- * contact: jflavio90@gmail.com
- */
-
-/**
+ *
  * WifiConnector object should be created inside service or intentService
- * only works for configuredNetworks that has been created by this app
+ * you could instantiate it on any activity of fragment but network operations must work on a different thread from UI
+ *
+ * only works for configured networks that has been created by current app but could configure any network if you are building
+ * a signed and system application
+ *
+ * @author JoseFlavio
+ * contact: jflavio90@gmail.com
  */
 public class WifiConnector {
 
@@ -609,20 +616,4 @@ public class WifiConnector {
         return SECURITY_NONE;
     }
 
-    public interface ConnectionResultListener {
-        void successfulConnect(String SSID);
-        void errorConnect(int codeReason);
-        void onStateChange(SupplicantState supplicantState);
-    }
-
-    public interface ShowWifiListener {
-        void onNetworksFound(WifiManager wifiManager, List<ScanResult> wifiScanResult);
-        void onNetworksFound(JSONArray wifiList);
-        void errorSearchingNetworks(int errorCode);
-    }
-
-    public interface RemoveWifiListener {
-        void onWifiNetworkRemoved();
-        void onWifiNetworkRemoveError();
-    }
 }
