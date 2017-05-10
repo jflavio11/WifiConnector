@@ -1,11 +1,11 @@
 # WifiConnector
 ---
 
-## Open source library for Android to connect to Wifi Networks
+## Open source library for Android to connect and manage Wifi Networks
 
 ### Requirements
 * API > 16
-* Since Android 6, you are able to configure WifiNetworks that your app has created, **you cannot** edit wifi configurations from others apps.
+* Since Android 6, you are able to configure WifiNetworks that your app has created, **you cannot** edit wifi configurations from others apps (Unless you are developing a system application).
 
 ### Import
 #### Using Gradle
@@ -13,17 +13,17 @@
 
 	```
 	allprojects {
-			repositories {
+		repositories {
 				...
-				maven { url 'https://jitpack.io' }
-			}
+		    maven { url 'https://jitpack.io' }
 		}
+	}
 	```
 	
 * And add the dependency:
 
 	```
-	compile 'com.github.jflavio1:WifiConnector:v1.0'
+	compile 'com.github.jflavio1:WifiConnector:v1.1'
 	```
 
 #### Using Maven
@@ -31,20 +31,20 @@
 
 	```
 	<repositories>
-			<repository>
-			    <id>jitpack.io</id>
-			    <url>https://jitpack.io</url>
-			</repository>
-		</repositories>
+		<repository>
+		   <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		</repository>
+	</repositories>
 	```
 * And the dependency
 
 	```
 	<dependency>
-		    <groupId>com.github.jflavio1</groupId>
-		    <artifactId>WifiConnector</artifactId>
-		    <version>v1.0</version>
-		</dependency>
+		<groupId>com.github.jflavio1</groupId>
+		<artifactId>WifiConnector</artifactId>
+		<version>v1.0</version>
+	</dependency>
 	```
 
 
@@ -65,7 +65,7 @@
 
                 @Override
                 public void onStateChange(SupplicantState supplicantState) {
-		// update UI!
+		   // update UI!
                 }
 	});
 ```
