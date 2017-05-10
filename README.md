@@ -7,20 +7,66 @@
 * API > 16
 * Since Android 6, you are able to configure WifiNetworks that your app has created, **you cannot** edit wifi configurations from others apps.
 
+### Import
+#### Using Gradle
+* Add this on your root build.gradle of your project:
+
+	```
+	allprojects {
+			repositories {
+				...
+				maven { url 'https://jitpack.io' }
+			}
+		}
+	```
+	
+* And add the dependency:
+
+	```
+	compile 'com.github.jflavio1:WifiConnector:v1.0'
+	```
+
+#### Using Maven
+* Add to you build file
+
+	```
+	<repositories>
+			<repository>
+			    <id>jitpack.io</id>
+			    <url>https://jitpack.io</url>
+			</repository>
+		</repositories>
+	```
+* And the dependency
+
+	```
+	<dependency>
+		    <groupId>com.github.jflavio1</groupId>
+		    <artifactId>WifiConnector</artifactId>
+		    <version>v1.0</version>
+		</dependency>
+	```
+
+
 ### Example
 ```
 	// third and fith parameters could be null
 	WifiConnector connector = new WifiConnector(this, "NEW_SSID", "NEW_BSSID", "WEP", "wifiPassword");
 	connector.connectToWifi(new WifiConnector.ConnectionResultListener() {
 	    @Override
-	    public void successfulConnect() {
-	        Toast.makeText(getApplicationContext(), "Successfuly connection to wifi!", Toast.LENGTH_SHORT).show();
-	    }
+                public void successfulConnect(String SSID) {
+                    // toast!
+                }
 
-	    @Override
-	    public void errorConnect(int codeReason) {
-	        Toast.makeText(getApplicationContext(), "There was an error connecting to wifi...", Toast.LENGTH_SHORT).show();
-	    }
+                @Override
+                public void errorConnect(int codeReason) {
+                    // toast!
+                }
+
+                @Override
+                public void onStateChange(SupplicantState supplicantState) {
+		// update UI!
+                }
 	});
 ```
 
