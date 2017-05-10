@@ -38,6 +38,12 @@ public class WifiConnector {
     private static final String TAG = WifiConnector.class.getName();
 
     /**
+     * for setting if log is going to be showed
+     * this attribute may be true if debugging
+     */
+    private boolean logOrNot;
+
+    /**
      * application context
      */
     private Context context;
@@ -472,8 +478,16 @@ public class WifiConnector {
         return false;
     }
 
+    public void setLog(boolean log){
+        this.logOrNot = log;
+    }
+
+    public boolean isLogOrNot() {
+        return logOrNot;
+    }
+
     private void wifiLog(String text) {
-        Log.d(TAG, "WifiConnector: " + text);
+        if(logOrNot) Log.d(TAG, "WifiConnector: " + text);
     }
 
     private class WifiReceiver extends BroadcastReceiver {
