@@ -151,7 +151,7 @@ public class WifiConnector {
     
     public WifiConnector(Context context, boolean enableWifi) {
         this.context = context;
-        this.wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         if(enableWifi){
             enableWifi();
         }
