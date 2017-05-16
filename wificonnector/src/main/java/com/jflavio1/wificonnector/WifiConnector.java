@@ -159,13 +159,13 @@ public class WifiConnector {
 
     public WifiConnector(Context context) {
         this.context = context;
-        this.wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         enableWifi();
     }
 
     public WifiConnector(Context context, ScanResult scanResult, @Nullable String password){
         this.context = context;
-        this.wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         setWifiConfiguration(scanResult.SSID, scanResult.BSSID, getWifiSecurityType(scanResult), password);
         enableWifi();
     }
@@ -173,13 +173,13 @@ public class WifiConnector {
     public WifiConnector(WifiConfiguration wifiConfiguration, Context context) {
         this.wifiConfiguration = wifiConfiguration;
         this.context = context;
-        this.wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         enableWifi();
     }
 
     public WifiConnector(Context context, String SSID, @Nullable String BSSID, String securityType, @Nullable String password) {
         this.context = context;
-        this.wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         setWifiConfiguration(SSID,BSSID, securityType, password);
         enableWifi();
     }
@@ -297,7 +297,7 @@ public class WifiConnector {
     }
 
     public boolean isAlreadyConnected(String BSSID){
-        ConnectivityManager connManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager connManager = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mWifi = connManager.getActiveNetworkInfo();
 
         wifiLog("isAlreadyConnected: " + wifiManager.getConnectionInfo().getBSSID() + " " + BSSID);
