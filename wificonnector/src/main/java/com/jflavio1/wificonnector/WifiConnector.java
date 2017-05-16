@@ -208,7 +208,8 @@ public class WifiConnector {
         if(!wifiManager.isWifiEnabled()) {
             wifiLog("Wifi was not enable, enable it...");
             wifiManager.setWifiEnabled(true);
-            setCurrentWifiInfo();
+            this.currentWifiSSID = wifiManager.getConnectionInfo().getSSID();
+            this.currentWifiBSSID = wifiManager.getConnectionInfo().getBSSID();
         }
     }
 
