@@ -10,7 +10,7 @@ public class ExampleUnitTest {
 
     @Test
     public void createWifiConnectorObjectTest(){
-        //assertNotNull(new WifiConnector(new MockContext()));
+        //assertNotNull(new WifiConnector());
     }
 
 }
