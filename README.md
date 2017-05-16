@@ -1,10 +1,10 @@
-# WifiConnector
+#WifiConnector
 ---
 
 ## Open source library for Android to connect and manage Wifi Networks
 
 ### Requirements
-* API > 16
+* API > 19
 * Since Android 6, you are able to configure WifiNetworks that your app has created, **you cannot** edit wifi configurations from others apps (Unless you are developing a system application).
 
 ### Import
