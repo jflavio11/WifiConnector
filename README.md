@@ -1,4 +1,4 @@
-#WifiConnector
+# WifiConnector
 ---
 
 ## Open source library for Android to connect and manage Wifi Networks
@@ -73,6 +73,9 @@
 
 ### Important!
 **WifiConnector instance must be implemented on Service or IntentService**
+
+Since 1.2-beta1 listeners are not inside WifiConnector class, so you must call them as a single class.
+
 Remember, you have to put these permissions on your Manifest:
 ```
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
