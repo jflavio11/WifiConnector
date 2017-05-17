@@ -68,17 +68,17 @@ public class WifiConnector {
     /**
      * interface that will call its own methods when {@link WifiReceiver#onReceive(Context, Intent)} method is called
      */
-    private ConnectionResultListener connectionResultListener;
+    public ConnectionResultListener connectionResultListener;
 
     /**
      * interface that will call its own methods when {@link ShowWifiReceiver#onReceive(Context, Intent)} method is called
      */
-    private ShowWifiListener showWifiListener;
+    public ShowWifiListener showWifiListener;
 
     /**
      * interface that will call its own method when {@link WifiConnector#removeWifiNetwork(ScanResult, RemoveWifiListener)} methods are called
      */
-    private RemoveWifiListener removeWifiListener;
+    public RemoveWifiListener removeWifiListener;
 
     /**
      * intent filter to listen for wifi state
