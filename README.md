@@ -23,7 +23,7 @@
 * And add the dependency:
 
 	```
-	compile 'com.github.jflavio1:WifiConnector:v1.2'
+	compile 'com.github.jflavio1:WifiConnector:v1.3'
 	```
 
 #### Using Maven
