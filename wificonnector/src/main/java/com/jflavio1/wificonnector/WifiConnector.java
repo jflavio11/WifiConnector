@@ -16,6 +16,7 @@ import android.util.Log;
 import com.jflavio1.wificonnector.interfaces.ConnectionResultListener;
 import com.jflavio1.wificonnector.interfaces.RemoveWifiListener;
 import com.jflavio1.wificonnector.interfaces.ShowWifiListener;
+import com.jflavio1.wificonnector.interfaces.WifiStateListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,6 +28,8 @@ import java.util.List;
 
 /**
  * Created by JoseFlavio on 17/11/2016.
+ *
+ * <h1>WifiConnector</h1>
  *
  * WifiConnector object should be created inside service or intentService
  * you could instantiate it on any activity of fragment but network operations must work on a different thread from UI
@@ -48,7 +51,7 @@ public class WifiConnector {
      * for setting if log is going to be showed
      * this attribute may be true if debugging
      */
-    private boolean logOrNot;
+    private boolean logOrNot = true;
 
     /**
      * application context
@@ -89,6 +92,12 @@ public class WifiConnector {
      * filter for showing wifiList
      */
     private IntentFilter showWifiListFilter;
+
+    private WifiStateListener wifiStateListener;
+
+    private IntentFilter wifiStateFilter;
+
+    private WifiStateReceiver wifiStateReceiver;
 
     /**
      * inherits from Broadcast receiver, will listen for {@link WifiConnector#chooseWifiFilter}
@@ -148,10 +157,11 @@ public class WifiConnector {
      * String value for current connected Wi-Fi network
      */
     public String currentWifiBSSID  = null;
-    
+
     public WifiConnector(Context context, boolean enableWifi) {
         this.context = context;
         this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiLog("wifi conenctor constructor, enable wifi: " + enableWifi);
         if(enableWifi){
             enableWifi();
         }
@@ -160,6 +170,7 @@ public class WifiConnector {
     public WifiConnector(Context context) {
         this.context = context;
         this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        wifiLog("wifi conenctor constructor, now call enable wifi");
         enableWifi();
     }
 
@@ -204,12 +215,24 @@ public class WifiConnector {
         }
     }
 
+    public void setWifiStateListener(WifiStateListener wifiStateListener){
+        this.wifiStateListener = wifiStateListener;
+    }
+
     public void enableWifi(){
+        wifiLog("enable wifi");
+        wifiStateFilter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
+        wifiStateReceiver = new WifiStateReceiver();
+        this.context.registerReceiver(wifiStateReceiver, wifiStateFilter);
         if(!wifiManager.isWifiEnabled()) {
-            wifiLog("Wifi was not enable, enable it...");
-            wifiManager.setWifiEnabled(true);
+            wifiLog("Wifi was not enable, enabling it...");
+            boolean active = wifiManager.setWifiEnabled(true);
+            wifiLog("active wifi: " + active);
+            wifiLog("wifi state: " + wifiManager.getWifiState());
             this.currentWifiSSID = wifiManager.getConnectionInfo().getSSID();
             this.currentWifiBSSID = wifiManager.getConnectionInfo().getBSSID();
+        }else{
+            wifiLog("Wifi is already enable...");
         }
     }
 
@@ -281,7 +304,8 @@ public class WifiConnector {
         showWifiListFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         showWifiReceiver = new ShowWifiReceiver();
         try {
-            this.context.registerReceiver(showWifiReceiver, showWifiListFilter);
+            wifiLog("registerin receiver for wifilist...");
+            this.context.getApplicationContext().registerReceiver(showWifiReceiver, showWifiListFilter);
         } catch (Exception e) {
             wifiLog("Register broadcast error (ShowWifi): " + e.toString());
         }
@@ -289,12 +313,20 @@ public class WifiConnector {
 
     public void showWifiList(ShowWifiListener showWifiListener) {
         this.showWifiListener = showWifiListener;
+        wifiLog("show wifi list");
         createShowWifiBroadcastListener();
         scanWifiNetworks();
     }
 
     private void scanWifiNetworks() {
-        wifiManager.startScan();
+        wifiLog("wifi state: " + wifiManager.getWifiState());
+        if(wifiManager.isWifiEnabled()){
+            wifiLog("wifi is enable");
+        }else{
+            wifiLog("wifi is no enabled....");
+        }
+        boolean scan = wifiManager.startScan();
+        wifiLog("scan wifi: "  + scan);
     }
 
     public boolean isAlreadyConnected(String BSSID){
@@ -551,6 +583,8 @@ public class WifiConnector {
             List<ScanResult> wifiScanResult = wifiManager.getScanResults();
             int scanSize = wifiScanResult.size();
 
+            wifiLog("Showwifireciver action:  " + intent.getAction());
+
             try {
                 scanSize--;
                 wifiLog("Scansize: " + scanSize);
@@ -615,6 +649,37 @@ public class WifiConnector {
             return SECURITY_EAP;
         }
         return SECURITY_NONE;
+    }
+
+
+    // extra
+
+    private class WifiStateReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, 0);
+
+            wifiStateListener.onStateChange(wifiState);
+
+            switch (wifiState){
+                case WifiManager.WIFI_STATE_ENABLED:
+                    wifiStateListener.onWifiEnabled();
+                    break;
+                case WifiManager.WIFI_STATE_ENABLING:
+                    wifiStateListener.onWifiEnabling();
+                    break;
+                case WifiManager.WIFI_STATE_DISABLING:
+                    wifiStateListener.onWifiDisabling();
+                    break;
+                case WifiManager.WIFI_STATE_DISABLED:
+                    wifiStateListener.onWifiDisabled();
+                    break;
+
+            }
+
+        }
     }
 
 }
