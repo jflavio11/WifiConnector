@@ -231,10 +231,28 @@ public class WifiConnector {
      * This method must be called before any asynchronous operation because some methods will work only if
      * {@link WifiManager#getWifiState()} returns {@link WifiManager#WIFI_STATE_ENABLED}
      *
+     * IMPORTANT!
+     * Do not forget to call {@link #unregisterWifiStateListener()} after finish all your operations
+     *
      * @param wifiStateListener Interface that will manage Wifi state
+     * @see WifiStateListener
      */
-    public void setWifiStateListener(WifiStateListener wifiStateListener) {
+    public void registerWifiStateListener(WifiStateListener wifiStateListener) {
         this.wifiStateListener = wifiStateListener;
+    }
+
+    /**
+     * This method must be called after all your operations if {@link #registerWifiStateListener(WifiStateListener)}
+     * was called. That means, on the onStop() or onDestroy method of your Activity, Fragment or Service.
+     * @see WifiStateListener
+     */
+    public void unregisterWifiStateListener(){
+        try{
+            this.wifiStateListener = null;
+            this.context.unregisterReceiver(wifiStateReceiver);
+        }catch (Exception e){
+            wifiLog("Error unregistering Wifi State Listener because may be it was never registered");
+        }
     }
 
     /**
