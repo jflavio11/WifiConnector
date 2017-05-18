@@ -43,7 +43,7 @@
 	<dependency>
 		<groupId>com.github.jflavio1</groupId>
 		<artifactId>WifiConnector</artifactId>
-		<version>v1.0</version>
+		<version>v3.0</version>
 	</dependency>
 	```
 
