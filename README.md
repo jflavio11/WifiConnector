@@ -23,7 +23,7 @@
 * And add the dependency:
 
 	```
-	compile 'com.github.jflavio1:WifiConnector:v1.1'
+	compile 'com.github.jflavio1:WifiConnector:v1.2'
 	```
 
 #### Using Maven
@@ -50,9 +50,40 @@
 
 ### Example
 ```
-	// third and fith parameters could be null
+	// First initializate a WifiConnector object
 	WifiConnector connector = new WifiConnector(this, "NEW_SSID", "NEW_BSSID", "WEP", "wifiPassword");
-	connector.connectToWifi(new WifiConnector.ConnectionResultListener() {
+	
+	// Before any operation, you should be sure that wifi enabled
+	connector.setWifiStateListener(new WifiStateListener() {
+            @Override
+            public void onStateChange(int wifiState) {
+
+            }
+
+            @Override
+            public void onWifiEnabled() {
+				// here you should be start your network operations
+            }
+
+            @Override
+            public void onWifiEnabling() {
+
+            }
+
+            @Override
+            public void onWifiDisabling() {
+
+            }
+
+            @Override
+            public void onWifiDisabled() {
+
+            }
+        });
+		
+	
+	// For connecting to specific wifi network, third parameter (new_bssid) could be null
+	connector.connectToWifi(new ConnectionResultListener() {
 	    @Override
                 public void successfulConnect(String SSID) {
                     // toast!
@@ -65,9 +96,13 @@
 
                 @Override
                 public void onStateChange(SupplicantState supplicantState) {
-		   // update UI!
+					// update UI!
                 }
 	});
+	
+	// And do not forget to unregister your wifi state listener on the onStop() or onDestroy() method
+	connector.unregisterWifiStateListener();
+	
 ```
 
 
