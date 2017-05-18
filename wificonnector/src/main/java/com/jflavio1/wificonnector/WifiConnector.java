@@ -714,7 +714,6 @@ public class WifiConnector {
             switch (wifiState) {
                 case WifiManager.WIFI_STATE_ENABLED:
                     wifiStateListener.onWifiEnabled();
-                    context.unregisterReceiver(this);
                     break;
                 case WifiManager.WIFI_STATE_ENABLING:
                     wifiStateListener.onWifiEnabling();
@@ -724,7 +723,6 @@ public class WifiConnector {
                     break;
                 case WifiManager.WIFI_STATE_DISABLED:
                     wifiStateListener.onWifiDisabled();
-                    context.unregisterReceiver(this);
                     break;
 
             }
