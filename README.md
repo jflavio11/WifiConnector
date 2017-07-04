@@ -23,7 +23,7 @@
 * And add the dependency:
 
 	```
-	compile 'com.github.jflavio1:WifiConnector:v1.3'
+	compile 'com.github.jflavio1:WifiConnector:v1.4'
 	```
 
 #### Using Maven
@@ -43,7 +43,7 @@
 	<dependency>
 		<groupId>com.github.jflavio1</groupId>
 		<artifactId>WifiConnector</artifactId>
-		<version>v1.3</version>
+		<version>v1.4</version>
 	</dependency>
 	```
 
