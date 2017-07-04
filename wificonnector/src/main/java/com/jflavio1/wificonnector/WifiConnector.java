@@ -272,6 +272,8 @@ public class WifiConnector {
 
     /**
      * This method is for unregister {@link #connectionResultListener} object.
+     * {@link WifiConnectionReceiver#onReceive(Context, Intent)} use this when {@link SupplicantState#COMPLETED} or
+     * {@link SupplicantState#DISCONNECTED} states are called.
      */
     public void unregisterWifiConnectionListener(){
         try{
@@ -295,6 +297,7 @@ public class WifiConnector {
 
     /**
      * For unregistering {@link #showWifiListListener} object.
+     * {@link ShowWifiListReceiver#onReceive(Context, Intent)} call this method when scan results are returned.
      */
     public void unregisterShowWifiListListener(){
         try{
@@ -729,7 +732,7 @@ public class WifiConnector {
                             setCurrentWifiSSID(wifiManager.getConnectionInfo().getSSID());
                             setCurrentWifiBSSID(wifiManager.getConnectionInfo().getBSSID());
                             connectionResultListener.successfulConnect(getCurrentWifiSSID());
-                            context.unregisterReceiver(wifiConnectionReceiver);
+                            unregisterWifiConnectionListener();
                         }
                         break;
                     case DISCONNECTED:
@@ -742,7 +745,7 @@ public class WifiConnector {
                             } else {
                                 connectionResultListener.errorConnect(UNKOWN_ERROR);
                             }
-                            context.unregisterReceiver(wifiConnectionReceiver);
+                            unregisterWifiConnectionListener();
                         }
                         break;
                     case AUTHENTICATING:
@@ -811,7 +814,7 @@ public class WifiConnector {
                 showWifiListListener.errorSearchingNetworks(UNKOWN_ERROR);
             }
 
-            context.unregisterReceiver(this);
+            unregisterShowWifiListListener();
 
         }
 
