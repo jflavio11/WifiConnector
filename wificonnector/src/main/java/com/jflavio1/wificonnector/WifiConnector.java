@@ -622,14 +622,18 @@ public class WifiConnector {
         List<WifiConfiguration> list1 = wifiManager.getConfiguredNetworks();
         if (list1 != null && list1.size() > 0) {
             for (WifiConfiguration i : list1) {
-                if (SSID.equals(currentWifiBSSID) || BSSID.equals(getCurrentWifiBSSID()) && wifiManager.removeNetwork(i
-                        .networkId)) {
-                    wifiLog("Network deleted: " + i.networkId + " " + i.SSID);
-                    wifiManager.saveConfiguration();
-                    removeWifiListener.onWifiNetworkRemoved();
-                } else {
-                    wifiLog("Unable to remove Wifi Network " + i.SSID);
-                    removeWifiListener.onWifiNetworkRemoveError();
+                try {
+                    if (SSID.equals(currentWifiBSSID) || BSSID.equals(getCurrentWifiBSSID()) && wifiManager.removeNetwork(i
+                            .networkId)) {
+                        wifiLog("Network deleted: " + i.networkId + " " + i.SSID);
+                        wifiManager.saveConfiguration();
+                        removeWifiListener.onWifiNetworkRemoved();
+                    } else {
+                        wifiLog("Unable to remove Wifi Network " + i.SSID);
+                        removeWifiListener.onWifiNetworkRemoveError();
+                    }
+                } catch (NullPointerException e) {
+                    wifiLog("Exception on removing wifi network: " + e.toString());
                 }
             }
         } else {
