@@ -51,57 +51,81 @@
 ### Example
 ```
 	// First initializate a WifiConnector object
-	WifiConnector connector = new WifiConnector(this, "NEW_SSID", "NEW_BSSID", "WEP", "wifiPassword");
-	
-	// Before any operation, you should be sure that wifi enabled
-	connector.setWifiStateListener(new WifiStateListener() {
+	WifiConnector connector = new WifiConnector(this, "NEW_SSID", "NEW_BSSID", "WEP", "wifiPassword")
+	// you could register wifi state listener
+	.registerWifiStateListener(new WifiStateListener() {
             @Override
             public void onStateChange(int wifiState) {
-
+                
             }
 
             @Override
             public void onWifiEnabled() {
-				// here you should be start your network operations
+                // here you should start your network operations
             }
 
             @Override
             public void onWifiEnabling() {
-
+                
             }
 
             @Override
             public void onWifiDisabling() {
-
+                
             }
 
             @Override
             public void onWifiDisabled() {
+                
+            }
+        })
+		// and register wifi connection listener
+		.registerWifiConnectionListener(new ConnectionResultListener() {
+            @Override
+            public void successfulConnect(String SSID) {
+                Log.d("MyTag", "Success connecting to Access Point " + SSID);
+            }
+
+            @Override
+            public void errorConnect(int codeReason) {
+                
+            }
+
+            @Override
+            public void onStateChange(SupplicantState supplicantState) {
+                
+            }
+        })
+		// and after register all listeners you want, you sould enable wifi and connect to the access point
+		.enableWifi().connectToWifi();
+	
+		
+		**OR SIMPLY**
+		WifiConnector connector = new WifiConnector(this, "NEW_SSID", "NEW_BSSID", "WEP", "wifiPassword");
+		
+		connector.enableWifi();
+		
+		connector.connectToWifi(new ConnectionResultListener() {
+            @Override
+            public void successfulConnect(String SSID) {
+                
+            }
+
+            @Override
+            public void errorConnect(int codeReason) {
+
+            }
+
+            @Override
+            public void onStateChange(SupplicantState supplicantState) {
 
             }
         });
 		
-	
-	// For connecting to specific wifi network, third parameter (new_bssid) could be null
-	connector.connectToWifi(new ConnectionResultListener() {
-	    @Override
-                public void successfulConnect(String SSID) {
-                    // toast!
-                }
-
-                @Override
-                public void errorConnect(int codeReason) {
-                    // toast!
-                }
-
-                @Override
-                public void onStateChange(SupplicantState supplicantState) {
-					// update UI!
-                }
-	});
-	
-	// And do not forget to unregister your wifi state listener on the onStop() or onDestroy() method
-	connector.unregisterWifiStateListener();
+		
+		
+	// And do not forget to unregister your wifi listeners on the onStop() or onDestroy() method
+	connector.unregisterListeners(wifiConnector.wifiStateReceiver, wifiConnector.wifiConnectionReceiver);
 	
 ```
 
@@ -109,6 +133,7 @@
 ### Important!
 **WifiConnector instance must be implemented on Service or IntentService**
 
+**Since 1.4 enableWifi() method is not on constructors anymore, you must call it explicity**
 Since 1.2-beta1 listeners are not inside WifiConnector class, so you must call them as a single class.
 
 Remember, you have to put these permissions on your Manifest:
