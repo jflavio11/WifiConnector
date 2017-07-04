@@ -493,6 +493,26 @@ public class WifiConnector {
 
     /**
      * Tries to connect to specific wifi
+     * Remember: you must be register {@link #connectionResultListener} object before.
+     */
+    public void connectToWifi() {
+        if (isConnectedToBSSID(wifiConfiguration.BSSID)) {
+            connectionResultListener.errorConnect(SAME_NETWORK);
+        } else {
+            if (wifiManager.getConnectionInfo().getBSSID() != null) {
+                setCurrentWifiSSID(wifiManager.getConnectionInfo().getSSID());
+                setCurrentWifiBSSID(wifiManager.getConnectionInfo().getBSSID());
+                wifiLog("Already connected to: " + wifiManager.getConnectionInfo().getSSID() + " " +
+                        "Now trying to connect to " + wifiConfiguration.SSID);
+            }
+            createWifiConnectionBroadcastListener();
+            connectToWifiAccesPoint();
+            wifiManager.reconnect();
+        }
+    }
+
+    /**
+     * Tries to connect to specific wifi
      *
      * @param connectionResultListener with methods of success and error
      */
@@ -520,7 +540,7 @@ public class WifiConnector {
      *
      * @return boolean value if connection was successfuly complete
      */
-    private boolean connectToWifi() {
+    private boolean connectToWifiAccesPoint() {
         int networkId = getNetworkId(wifiConfiguration.SSID);
         wifiLog("network id found: " + networkId);
         if (networkId == -1) {
