@@ -273,7 +273,9 @@ public class WifiConnector {
     /**
      * This method is for unregister {@link #connectionResultListener} object.
      * {@link WifiConnectionReceiver#onReceive(Context, Intent)} use this when {@link SupplicantState#COMPLETED} or
-     * {@link SupplicantState#DISCONNECTED} states are called.
+     * {@link SupplicantState#DISCONNECTED} states are set.
+     *
+     * <strong>So you should not call it explicit if does not know the connection state lifecycle.</strong>
      */
     public void unregisterWifiConnectionListener(){
         try{
@@ -334,7 +336,7 @@ public class WifiConnector {
 
     /**
      * Allows unregistering any of the listener that WifiConnector could use.
-     * @param listeners is an array of WifiConnectorListeners
+     * @param listeners is an array of WifiConnector Broadcast Receivers
      */
     public void unregisterListeners(Object... listeners){
         wifiLog("Unregistering wifi listener(s)");
@@ -495,27 +497,7 @@ public class WifiConnector {
     }
 
     /**
-     * Tries to connect to specific wifi
-     * Remember: you must be register {@link #connectionResultListener} object before.
-     */
-    public void connectToWifi() {
-        if (isConnectedToBSSID(wifiConfiguration.BSSID)) {
-            connectionResultListener.errorConnect(SAME_NETWORK);
-        } else {
-            if (wifiManager.getConnectionInfo().getBSSID() != null) {
-                setCurrentWifiSSID(wifiManager.getConnectionInfo().getSSID());
-                setCurrentWifiBSSID(wifiManager.getConnectionInfo().getBSSID());
-                wifiLog("Already connected to: " + wifiManager.getConnectionInfo().getSSID() + " " +
-                        "Now trying to connect to " + wifiConfiguration.SSID);
-            }
-            createWifiConnectionBroadcastListener();
-            connectToWifiAccesPoint();
-            wifiManager.reconnect();
-        }
-    }
-
-    /**
-     * Tries to connect to specific wifi
+     * Tries to connect to specific wifi set on the constructor.
      *
      * @param connectionResultListener with methods of success and error
      */
@@ -530,8 +512,26 @@ public class WifiConnector {
                 wifiLog("Already connected to: " + wifiManager.getConnectionInfo().getSSID() + " " +
                         "Now trying to connect to " + wifiConfiguration.SSID);
             }
-            createWifiConnectionBroadcastListener();
             connectToWifi();
+            wifiManager.reconnect();
+        }
+    }
+
+    /**
+     * Tries to connect to specific wifi set on the constructor.
+     * <strong>Remember: you must be register {@link #connectionResultListener} object before.</strong>
+     */
+    public void connectToWifi() {
+        if (isConnectedToBSSID(wifiConfiguration.BSSID)) {
+            connectionResultListener.errorConnect(SAME_NETWORK);
+        } else {
+            if (wifiManager.getConnectionInfo().getBSSID() != null) {
+                setCurrentWifiSSID(wifiManager.getConnectionInfo().getSSID());
+                setCurrentWifiBSSID(wifiManager.getConnectionInfo().getBSSID());
+                wifiLog("Already connected to: " + wifiManager.getConnectionInfo().getSSID() + " " +
+                        "Now trying to connect to " + wifiConfiguration.SSID);
+            }
+            connectToWifiAccesPoint();
             wifiManager.reconnect();
         }
     }
@@ -544,6 +544,7 @@ public class WifiConnector {
      * @return boolean value if connection was successfuly complete
      */
     private boolean connectToWifiAccesPoint() {
+        createWifiConnectionBroadcastListener();
         int networkId = getNetworkId(wifiConfiguration.SSID);
         wifiLog("network id found: " + networkId);
         if (networkId == -1) {
