@@ -277,10 +277,11 @@ public class WifiConnector {
      *
      * <strong>So you should not call it explicit if does not know the connection state lifecycle.</strong>
      */
-    public void unregisterWifiConnectionListener(){
+    public synchronized void unregisterWifiConnectionListener(){
         try{
             this.connectionResultListener = null;
-            this.context.unregisterReceiver(wifiConnectionReceiver);
+            this.context.unregisterReceiver(this.wifiConnectionReceiver);
+            this.wifiConnectionReceiver = null;
         }catch (Exception e){
             wifiLog("Error unregistering Wifi Connection Listener because may be it was never registered");
         }
@@ -301,7 +302,7 @@ public class WifiConnector {
      * For unregistering {@link #showWifiListListener} object.
      * {@link ShowWifiListReceiver#onReceive(Context, Intent)} call this method when scan results are returned.
      */
-    public void unregisterShowWifiListListener(){
+    public synchronized void unregisterShowWifiListListener(){
         try{
             this.showWifiListListener = null;
             this.context.unregisterReceiver(showWifiListReceiver);
@@ -325,7 +326,7 @@ public class WifiConnector {
     /**
      * For unregistering {@link #removeWifiListener} object.
      */
-    public void unregisterWifiRemoveListener(){
+    public synchronized void unregisterWifiRemoveListener(){
         try{
             this.removeWifiListener = null;
             this.context.unregisterReceiver(wifiStateReceiver);
@@ -335,17 +336,17 @@ public class WifiConnector {
     }
 
     /**
-     * Allows unregistering any of the listener that WifiConnector could use.
-     * @param listeners is an array of WifiConnector Broadcast Receivers
+     * Allows unregistering any of the broadcastlisteners that WifiConnector could use.
+     * @param broadcastReceivers is an array of WifiConnector Broadcast Receivers
      */
-    public void unregisterListeners(Object... listeners){
+    public synchronized void unregisterReceivers(Object... broadcastReceivers){
         wifiLog("Unregistering wifi listener(s)");
-        for (int i = 0; i < listeners.length; i++) {
+        for (int i = 0; i < broadcastReceivers.length; i++) {
 
             try{
-                this.context.unregisterReceiver((BroadcastReceiver)listeners[i]);
+                this.context.unregisterReceiver((BroadcastReceiver)broadcastReceivers[i]);
             }catch (Exception e){
-                wifiLog("Error unregistering listener "+ i +" because may be it was never registered");
+                wifiLog("Error unregistering broadcast "+ i +" because may be it was never registered");
             }
 
         }
@@ -360,7 +361,7 @@ public class WifiConnector {
     public WifiConnector enableWifi() {
         if (!wifiManager.isWifiEnabled()) {
             wifiLog("Wifi was not enable, enabling it...");
-            boolean active = wifiManager.setWifiEnabled(true);
+            wifiManager.setWifiEnabled(true);
             this.currentWifiSSID = wifiManager.getConnectionInfo().getSSID();
             this.currentWifiBSSID = wifiManager.getConnectionInfo().getBSSID();
         } else {
@@ -577,7 +578,7 @@ public class WifiConnector {
         if (networkId == -1) {
             wifiLog("So networkId still -1, there was an error... may be authentication?");
             connectionResultListener.errorConnect(AUTHENTICATION_ERROR);
-            context.unregisterReceiver(wifiConnectionReceiver);
+            unregisterWifiConnectionListener();
             return false;
         }
         return connectWifiManager(networkId);
@@ -671,10 +672,10 @@ public class WifiConnector {
     }
 
     /**
-     * Similar as {@link #forgetWifiNetwork(WifiManager, WifiConfiguration)} but this will run with any application
-     * installed as user app, but will only delete wifi configurations created by its own
+     * Similar to {@link #forgetWifiNetwork(WifiManager, WifiConfiguration)} but this will run with any application
+     * installed as user app and will only delete wifi configurations created by its own.
      *
-     * @return true if delete configuration was success
+     * @return true if delete configuration was successful
      */
     private boolean deleteWifiConf() {
         try {
@@ -721,24 +722,29 @@ public class WifiConnector {
 
                 SupplicantState state = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
 
-                wifiLog("Broadcast action: " + state);
+                wifiLog("Connection state: " + state);
 
                 connectionResultListener.onStateChange(state);
 
                 switch (state) {
                     case COMPLETED:
                         wifiLog("Connection to Wifi was successfuly completed...\n" +
-                                "Connected to bssid: " + wifiManager.getConnectionInfo().getBSSID());
+                                "Connected to BSSID: " + wifiManager.getConnectionInfo().getBSSID()+
+                                "And SSID: " + wifiManager.getConnectionInfo().getSSID());
                         if (wifiManager.getConnectionInfo().getBSSID() != null) {
                             setCurrentWifiSSID(wifiManager.getConnectionInfo().getSSID());
                             setCurrentWifiBSSID(wifiManager.getConnectionInfo().getBSSID());
                             connectionResultListener.successfulConnect(getCurrentWifiSSID());
                             unregisterWifiConnectionListener();
                         }
+                        // if BSSID is null, may be is still triying to get information about the access point
                         break;
+
                     case DISCONNECTED:
                         int supl_error = intent.getIntExtra(WifiManager.EXTRA_SUPPLICANT_ERROR, -1);
                         wifiLog("Disconnected... Supplicant error: " + supl_error);
+
+                        // only remove broadcast listener if error was ERROR_AUTHENTICATING
                         if (supl_error == WifiManager.ERROR_AUTHENTICATING) {
                             wifiLog("Authentication error...");
                             if (deleteWifiConf()) {
@@ -749,6 +755,7 @@ public class WifiConnector {
                             unregisterWifiConnectionListener();
                         }
                         break;
+
                     case AUTHENTICATING:
                         wifiLog("Authenticating...");
                         break;
