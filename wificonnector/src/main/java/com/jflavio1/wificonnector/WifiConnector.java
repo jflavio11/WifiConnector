@@ -37,11 +37,10 @@ import java.util.List;
  * only works for configured networks that has been created by current app but could configure any network if you are building
  * a signed and system application
  *
- * @since version 1.4 if you want to turn-on wifi <strong>you must call {@link #enableWifi()} method after
- * creating WifiConnector object.</strong>
- *
  * @author JoseFlavio
  *         contact: jflavio90@gmail.com
+ * @since version 1.4 if you want to turn-on wifi <strong>you must call {@link #enableWifi()} method after
+ * creating WifiConnector object.</strong>
  */
 public class WifiConnector {
 
@@ -227,12 +226,14 @@ public class WifiConnector {
         }
     }
 
+    // region Receivers
+
     /**
      * This method must be called before any asynchronous operation because some methods will work only if
      * {@link WifiManager#getWifiState()} returns {@link WifiManager#WIFI_STATE_ENABLED}
-     *
+     * <p>
      * IMPORTANT!
-     * Do not forget to call {@link #unregisterWifiStateListener()} after finish all your operations
+     * <strong>Do not forget to call {@link #unregisterWifiStateListener()} after finish all your operations.</strong>
      *
      * @param wifiStateListener Interface that will manage Wifi state
      * @see WifiStateListener
@@ -245,25 +246,27 @@ public class WifiConnector {
 
     /**
      * This method must be called after all your operations if {@link #registerWifiStateListener(WifiStateListener)}
-     * was called. That means, on the onStop() or onDestroy method of your Activity, Fragment or Service.
+     * was called. That means, on the onStop() or onDestroy() method of your Activity, Fragment or Service.
+     *
      * @see WifiStateListener
      */
-    public void unregisterWifiStateListener(){
-        try{
+    public void unregisterWifiStateListener() {
+        try {
             context.getApplicationContext().unregisterReceiver(wifiStateReceiver);
-        }catch (Exception e){
+        } catch (Exception e) {
             wifiLog("Error unregistering Wifi State Listener because may be it was never registered");
         }
     }
 
     /**
-     * This method allows to register {@link ConnectionResultListener} interface to know if, when you turn-on wifi it
+     * This method allows to register {@link ConnectionResultListener} interface to know whether when you turn-on wifi it
      * is connecting to any wifi access point.
+     *
      * @param connectionResultListener is the listener for knowing wifi supplicant state.
      * @return this wifiConnector object
      * @see SupplicantState
      */
-    public WifiConnector registerWifiConnectionListener(ConnectionResultListener connectionResultListener){
+    public WifiConnector registerWifiConnectionListener(ConnectionResultListener connectionResultListener) {
         createWifiConnectionBroadcastListener();
         this.connectionResultListener = connectionResultListener;
         return this;
@@ -273,36 +276,37 @@ public class WifiConnector {
      * This method is for unregister {@link #connectionResultListener} object.
      * {@link WifiConnectionReceiver#onReceive(Context, Intent)} use this when {@link SupplicantState#COMPLETED} or
      * {@link SupplicantState#DISCONNECTED} states are set.
-     *
-     * <strong>So you should not call it explicit if does not know the connection state lifecycle.</strong>
+     * <p>
+     * <strong>So you should not call it explicit if the connection state lifecycle is not known.</strong>
      */
-    public synchronized void unregisterWifiConnectionListener(){
-        try{
+    public synchronized void unregisterWifiConnectionListener() {
+        try {
             context.getApplicationContext().unregisterReceiver(this.wifiConnectionReceiver);
-        }catch (Exception e){
+        } catch (Exception e) {
             wifiLog("Error unregistering Wifi Connection Listener because may be it was never registered");
         }
     }
 
     /**
      * This method allows to listen the wifi 'finding networks' state
+     *
      * @param showWifiListener is the listener for knowing searching state
      * @return this WifiConnector object
      */
-    public WifiConnector registerShowWifiListListener(ShowWifiListener showWifiListener){
+    public WifiConnector registerShowWifiListListener(ShowWifiListener showWifiListener) {
         createShowWifiListBroadcastListener();
         this.showWifiListListener = showWifiListener;
         return this;
     }
 
     /**
-     * For unregistering {@link #showWifiListListener} object.
+     * For unregister {@link #showWifiListListener} object.
      * {@link ShowWifiListReceiver#onReceive(Context, Intent)} call this method when scan results are returned.
      */
-    public synchronized void unregisterShowWifiListListener(){
-        try{
+    public synchronized void unregisterShowWifiListListener() {
+        try {
             context.getApplicationContext().unregisterReceiver(showWifiListReceiver);
-        }catch (Exception e){
+        } catch (Exception e) {
             wifiLog("Error unregistering Wifi List Listener because may be it was never registered");
         }
     }
@@ -310,47 +314,52 @@ public class WifiConnector {
     /**
      * This method allows to listener actions of the {@link #removeWifiNetwork(ScanResult, RemoveWifiListener)}
      * method variations.
+     *
      * @param removeWifiListener is the listener {@link RemoveWifiListener}
      * @return current WifiConnector object.
      */
-    public WifiConnector registerWifiRemoveListener(RemoveWifiListener removeWifiListener){
+    public WifiConnector registerWifiRemoveListener(RemoveWifiListener removeWifiListener) {
         createWifiStateBroadcast();
         this.removeWifiListener = removeWifiListener;
         return this;
     }
 
     /**
-     * For unregistering {@link #removeWifiListener} object.
+     * For unregister {@link #removeWifiListener} object.
      */
-    public synchronized void unregisterWifiRemoveListener(){
-        try{
+    public synchronized void unregisterWifiRemoveListener() {
+        try {
             context.getApplicationContext().unregisterReceiver(wifiStateReceiver);
-        }catch (Exception e){
+        } catch (Exception e) {
             wifiLog("Error unregistering Wifi Remove Listener because may be it was never registered");
         }
     }
 
     /**
-     * Allows unregistering any of the broadcastlisteners that WifiConnector could use.
+     * Allows unregister any of the broadcastlisteners that WifiConnector could use.
+     *
      * @param broadcastReceivers is an array of WifiConnector Broadcast Receivers
      */
-    public synchronized void unregisterReceivers(Object... broadcastReceivers){
+    public synchronized void unregisterReceivers(Object... broadcastReceivers) {
         wifiLog("Unregistering wifi listener(s)");
         for (int i = 0; i < broadcastReceivers.length; i++) {
 
-            try{
-                context.getApplicationContext().unregisterReceiver((BroadcastReceiver)broadcastReceivers[i]);
-            }catch (Exception e){
-                wifiLog("Error unregistering broadcast "+ i +" because may be it was never registered");
+            try {
+                context.getApplicationContext().unregisterReceiver((BroadcastReceiver) broadcastReceivers[i]);
+            } catch (Exception e) {
+                wifiLog("Error unregistering broadcast " + i + " because may be it was never registered");
             }
 
         }
     }
 
+    // endregion
+
     /**
      * For enabling wifi
      * If you want to listen wifi states, should call {@link #registerWifiStateListener(WifiStateListener)} and wait for
      * callback to update User Interface of your application
+     *
      * @return this WifiConnector object for being used in any register callback method.
      */
     public WifiConnector enableWifi() {
@@ -390,6 +399,7 @@ public class WifiConnector {
 
     /**
      * For knowing if wifi is enabled
+     *
      * @return true if wifi is enabled
      */
     public boolean isWifiEnbled() {
@@ -514,7 +524,7 @@ public class WifiConnector {
     }
 
     /**
-     * Tries to connect to specific wifi set on the constructor.
+     * Tries to connect to specific wifi network set on the constructor.
      * <strong>Remember: you must be register {@link #connectionResultListener} object before.</strong>
      */
     public void connectToWifi() {
@@ -533,11 +543,11 @@ public class WifiConnector {
     }
 
     /**
-     * allows to connect to specific Wifi access point
-     * tries to get network id
-     * if network id = -1 add network configuration
+     * Allows to connect to specific Wifi access point.
+     * <ul><li>Tries to get network id</li></ul>
+     * <ul><li>if network id = -1 add network configuration</li></ul>
      *
-     * @return boolean value if connection was successfuly complete
+     * @return boolean value if connection was successfully completed
      */
     private boolean connectToWifiAccesPoint() {
         createWifiConnectionBroadcastListener();
@@ -551,8 +561,8 @@ public class WifiConnector {
     }
 
     /**
-     * Search network id by given SSID
-     * if network is totally new, it returns -1
+     * Search network id by given SSID.
+     * If network is totally new, it returns -1.
      *
      * @param SSID name of wifi network
      * @return wifi network id
@@ -643,8 +653,8 @@ public class WifiConnector {
     }
 
     /**
-     * ForgetNetwork is a method that will only works if app is signed and run as system
-     * It will look for "forget" hidden method on WifiManager class
+     * ForgetNetwork is a method that will only works if app is signed and run as system.
+     * It will look for "forget" hidden method on WifiManager class.
      *
      * @param wifiManager current wifiManager
      * @param i           the wifiConfigured network to delete
@@ -712,6 +722,7 @@ public class WifiConnector {
     private class WifiConnectionReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context c, Intent intent) {
+            if (connectionResultListener == null) return;
             String action = intent.getAction();
             if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
 
@@ -724,7 +735,7 @@ public class WifiConnector {
                 switch (state) {
                     case COMPLETED:
                         wifiLog("Connection to Wifi was successfuly completed...\n" +
-                                "Connected to BSSID: " + wifiManager.getConnectionInfo().getBSSID()+
+                                "Connected to BSSID: " + wifiManager.getConnectionInfo().getBSSID() +
                                 "And SSID: " + wifiManager.getConnectionInfo().getSSID());
                         if (wifiManager.getConnectionInfo().getBSSID() != null) {
                             setCurrentWifiSSID(wifiManager.getConnectionInfo().getSSID());
@@ -763,6 +774,8 @@ public class WifiConnector {
     private class ShowWifiListReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+
+            if (showWifiListListener == null) return;
 
             final JSONArray wifiList = new JSONArray();
             List<ScanResult> wifiScanResult = wifiManager.getScanResults();
@@ -827,6 +840,8 @@ public class WifiConnector {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+
+            if (wifiStateListener == null) return;
 
             int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, 0);
 
