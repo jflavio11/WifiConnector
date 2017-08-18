@@ -250,8 +250,7 @@ public class WifiConnector {
      */
     public void unregisterWifiStateListener(){
         try{
-            this.wifiStateListener = null;
-            this.context.unregisterReceiver(wifiStateReceiver);
+            context.getApplicationContext().unregisterReceiver(wifiStateReceiver);
         }catch (Exception e){
             wifiLog("Error unregistering Wifi State Listener because may be it was never registered");
         }
@@ -279,9 +278,7 @@ public class WifiConnector {
      */
     public synchronized void unregisterWifiConnectionListener(){
         try{
-            this.connectionResultListener = null;
-            this.context.unregisterReceiver(this.wifiConnectionReceiver);
-            this.wifiConnectionReceiver = null;
+            context.getApplicationContext().unregisterReceiver(this.wifiConnectionReceiver);
         }catch (Exception e){
             wifiLog("Error unregistering Wifi Connection Listener because may be it was never registered");
         }
@@ -304,8 +301,7 @@ public class WifiConnector {
      */
     public synchronized void unregisterShowWifiListListener(){
         try{
-            this.showWifiListListener = null;
-            this.context.unregisterReceiver(showWifiListReceiver);
+            context.getApplicationContext().unregisterReceiver(showWifiListReceiver);
         }catch (Exception e){
             wifiLog("Error unregistering Wifi List Listener because may be it was never registered");
         }
@@ -328,8 +324,7 @@ public class WifiConnector {
      */
     public synchronized void unregisterWifiRemoveListener(){
         try{
-            this.removeWifiListener = null;
-            this.context.unregisterReceiver(wifiStateReceiver);
+            context.getApplicationContext().unregisterReceiver(wifiStateReceiver);
         }catch (Exception e){
             wifiLog("Error unregistering Wifi Remove Listener because may be it was never registered");
         }
@@ -344,7 +339,7 @@ public class WifiConnector {
         for (int i = 0; i < broadcastReceivers.length; i++) {
 
             try{
-                this.context.unregisterReceiver((BroadcastReceiver)broadcastReceivers[i]);
+                context.getApplicationContext().unregisterReceiver((BroadcastReceiver)broadcastReceivers[i]);
             }catch (Exception e){
                 wifiLog("Error unregistering broadcast "+ i +" because may be it was never registered");
             }
@@ -374,7 +369,7 @@ public class WifiConnector {
         wifiStateFilter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
         wifiStateReceiver = new WifiStateReceiver();
         try {
-            this.context.registerReceiver(wifiStateReceiver, wifiStateFilter);
+            context.getApplicationContext().registerReceiver(wifiStateReceiver, wifiStateFilter);
         } catch (Exception e) {
             wifiLog("Exception on registering broadcast for listening Wifi State: " + e.toString());
         }
@@ -445,7 +440,7 @@ public class WifiConnector {
         chooseWifiFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         wifiConnectionReceiver = new WifiConnectionReceiver();
         try {
-            this.context.registerReceiver(wifiConnectionReceiver, chooseWifiFilter);
+            context.getApplicationContext().registerReceiver(wifiConnectionReceiver, chooseWifiFilter);
         } catch (Exception e) {
             wifiLog("Register broadcast error (Choose): " + e.toString());
         }
@@ -456,7 +451,7 @@ public class WifiConnector {
         showWifiListFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
         showWifiListReceiver = new ShowWifiListReceiver();
         try {
-            this.context.getApplicationContext().registerReceiver(showWifiListReceiver, showWifiListFilter);
+            context.getApplicationContext().getApplicationContext().registerReceiver(showWifiListReceiver, showWifiListFilter);
         } catch (Exception e) {
             wifiLog("Register broadcast error (ShowWifi): " + e.toString());
         }
