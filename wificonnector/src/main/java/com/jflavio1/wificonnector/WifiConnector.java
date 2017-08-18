@@ -54,7 +54,7 @@ public class WifiConnector {
      * For setting if log is going to be showed
      * This attribute is true as default. Set {@link #setLog(boolean)} as false for avoid logs
      */
-    private boolean logOrNot = true;
+    private boolean logOrNot = false;
 
     /**
      * Should be application context
