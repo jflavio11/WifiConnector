@@ -467,6 +467,12 @@ public class WifiConnector {
         }
     }
 
+    /**
+     * Tries to scan available wifi networks. After {@link ShowWifiListReceiver} gets results (or not), it automatically  unregister the
+     * current broadcast listener so is not necessary to explicitly call {@link #unregisterShowWifiListListener()}.
+     *
+     * @param showWifiListener interface that will give the results
+     */
     public void showWifiList(ShowWifiListener showWifiListener) {
         this.showWifiListListener = showWifiListener;
         wifiLog("show wifi list");
