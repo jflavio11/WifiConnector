@@ -47,7 +47,7 @@ public class WifiConnector {
     /**
      * Tag for log
      */
-    private static final String TAG = WifiConnector.class.getName();
+    public static final String TAG = WifiConnector.class.getName();
 
     /**
      * For setting if log is going to be showed
@@ -287,6 +287,11 @@ public class WifiConnector {
         }
     }
 
+    /** @return the current {@link #connectionResultListener} object */
+    protected ConnectionResultListener getConnectionResultListener() {
+        return connectionResultListener;
+    }
+
     /**
      * This method allows to listen the wifi 'finding networks' state
      *
@@ -448,7 +453,7 @@ public class WifiConnector {
     private void createWifiConnectionBroadcastListener() {
         chooseWifiFilter = new IntentFilter();
         chooseWifiFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-        wifiConnectionReceiver = new WifiConnectionReceiver();
+        wifiConnectionReceiver = new WifiConnectionReceiver(this);
         try {
             context.getApplicationContext().registerReceiver(wifiConnectionReceiver, chooseWifiFilter);
         } catch (Exception e) {
@@ -688,7 +693,7 @@ public class WifiConnector {
      *
      * @return true if delete configuration was successful
      */
-    private boolean deleteWifiConf() {
+    boolean deleteWifiConf() {
         try {
             confList = wifiManager.getConfiguredNetworks();
             for (WifiConfiguration i : confList) {
@@ -723,58 +728,6 @@ public class WifiConnector {
             return SECURITY_EAP;
         }
         return SECURITY_NONE;
-    }
-
-    private class WifiConnectionReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context c, Intent intent) {
-            if (connectionResultListener == null) return;
-            String action = intent.getAction();
-            if (action.equals(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION)) {
-
-                SupplicantState state = intent.getParcelableExtra(WifiManager.EXTRA_NEW_STATE);
-
-                wifiLog("Connection state: " + state);
-
-                connectionResultListener.onStateChange(state);
-
-                switch (state) {
-                    case COMPLETED:
-                        wifiLog("Connection to Wifi was successfuly completed...\n" +
-                                "Connected to BSSID: " + wifiManager.getConnectionInfo().getBSSID() +
-                                "And SSID: " + wifiManager.getConnectionInfo().getSSID());
-                        if (wifiManager.getConnectionInfo().getBSSID() != null) {
-                            setCurrentWifiSSID(wifiManager.getConnectionInfo().getSSID());
-                            setCurrentWifiBSSID(wifiManager.getConnectionInfo().getBSSID());
-                            connectionResultListener.successfulConnect(getCurrentWifiSSID());
-                            unregisterWifiConnectionListener();
-                        }
-                        // if BSSID is null, may be is still triying to get information about the access point
-                        break;
-
-                    case DISCONNECTED:
-                        int supl_error = intent.getIntExtra(WifiManager.EXTRA_SUPPLICANT_ERROR, -1);
-                        wifiLog("Disconnected... Supplicant error: " + supl_error);
-
-                        // only remove broadcast listener if error was ERROR_AUTHENTICATING
-                        if (supl_error == WifiManager.ERROR_AUTHENTICATING) {
-                            wifiLog("Authentication error...");
-                            if (deleteWifiConf()) {
-                                connectionResultListener.errorConnect(AUTHENTICATION_ERROR);
-                            } else {
-                                connectionResultListener.errorConnect(UNKOWN_ERROR);
-                            }
-                            unregisterWifiConnectionListener();
-                        }
-                        break;
-
-                    case AUTHENTICATING:
-                        wifiLog("Authenticating...");
-                        break;
-                }
-
-            }
-        }
     }
 
     private class ShowWifiListReceiver extends BroadcastReceiver {
