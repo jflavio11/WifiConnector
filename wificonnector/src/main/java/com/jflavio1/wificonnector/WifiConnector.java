@@ -258,6 +258,10 @@ public class WifiConnector {
         }
     }
 
+    WifiStateListener getWifiStateListener() {
+        return wifiStateListener;
+    }
+
     /**
      * This method allows to register {@link ConnectionResultListener} interface to know whether when you turn-on wifi it
      * is connecting to any wifi access point.
@@ -287,8 +291,10 @@ public class WifiConnector {
         }
     }
 
-    /** @return the current {@link #connectionResultListener} object */
-    protected ConnectionResultListener getConnectionResultListener() {
+    /**
+     * @return the current {@link #connectionResultListener} object
+     */
+    ConnectionResultListener getConnectionResultListener() {
         return connectionResultListener;
     }
 
@@ -314,6 +320,10 @@ public class WifiConnector {
         } catch (Exception e) {
             wifiLog("Error unregistering Wifi List Listener because may be it was never registered");
         }
+    }
+
+    ShowWifiListener getShowWifiListListener() {
+        return showWifiListListener;
     }
 
     /**
@@ -381,7 +391,7 @@ public class WifiConnector {
 
     private void createWifiStateBroadcast() {
         wifiStateFilter = new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION);
-        wifiStateReceiver = new WifiStateReceiver();
+        wifiStateReceiver = new WifiStateReceiver(this);
         try {
             context.getApplicationContext().registerReceiver(wifiStateReceiver, wifiStateFilter);
         } catch (Exception e) {
@@ -464,7 +474,7 @@ public class WifiConnector {
     private void createShowWifiListBroadcastListener() {
         showWifiListFilter = new IntentFilter();
         showWifiListFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        showWifiListReceiver = new ShowWifiListReceiver();
+        showWifiListReceiver = new ShowWifiListReceiver(this);
         try {
             context.getApplicationContext().getApplicationContext().registerReceiver(showWifiListReceiver, showWifiListFilter);
         } catch (Exception e) {
@@ -728,105 +738,6 @@ public class WifiConnector {
             return SECURITY_EAP;
         }
         return SECURITY_NONE;
-    }
-
-    private class ShowWifiListReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if (showWifiListListener == null) return;
-
-            final JSONArray wifiList = new JSONArray();
-            List<ScanResult> wifiScanResult = wifiManager.getScanResults();
-            int scanSize = wifiScanResult.size();
-
-            wifiLog("Showwifireciver action:  " + intent.getAction());
-
-            try {
-                scanSize--;
-                wifiLog("Scansize: " + scanSize);
-                if (scanSize > 0) {
-                    showWifiListListener.onNetworksFound(wifiManager, wifiScanResult);
-                    while (scanSize >= 0) {
-
-                        if (!wifiScanResult.get(scanSize).SSID.isEmpty()) {
-                            /**
-                             * individual wifi item information
-                             */
-                            JSONObject wifiItem = new JSONObject();
-
-                            wifiItem.put("SSID", wifiScanResult.get(scanSize).SSID);
-                            wifiItem.put("BSSID", wifiScanResult.get(scanSize).BSSID);
-                            wifiItem.put("INFO", wifiScanResult.get(scanSize).capabilities);
-
-                            /**
-                             * this check if device has a current WiFi connection
-                             */
-                            if (wifiScanResult.get(scanSize).BSSID.equals(wifiManager.getConnectionInfo().getBSSID())) {
-                                wifiItem.put("CONNECTED", true);
-                                setCurrentWifiSSID(wifiScanResult.get(scanSize).SSID);
-                                setCurrentWifiBSSID(wifiScanResult.get(scanSize).BSSID);
-                            } else {
-                                wifiItem.put("CONNECTED", false);
-                            }
-                            wifiItem.put("SECURITY_TYPE", getWifiSecurityType(wifiScanResult.get(scanSize)));
-                            wifiItem.put("LEVEL", WifiManager.calculateSignalLevel(wifiScanResult.get(scanSize).level, 100) + "%");
-
-                            wifiList.put(wifiItem);
-                        }
-
-                        scanSize--;
-                    }
-
-                    showWifiListListener.onNetworksFound(wifiList);
-
-                } else {
-                    showWifiListListener.errorSearchingNetworks(NO_WIFI_NETWORKS);
-                }
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-                showWifiListListener.errorSearchingNetworks(UNKOWN_ERROR);
-            }
-
-            unregisterShowWifiListListener();
-
-        }
-
-    }
-
-    private class WifiStateReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if (wifiStateListener == null) return;
-
-            int wifiState = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE, 0);
-
-            wifiStateListener.onStateChange(wifiState);
-
-            switch (wifiState) {
-                case WifiManager.WIFI_STATE_ENABLED:
-                    wifiLog("Wifi enabled");
-                    wifiStateListener.onWifiEnabled();
-                    break;
-                case WifiManager.WIFI_STATE_ENABLING:
-                    wifiLog("Enabling wifi");
-                    wifiStateListener.onWifiEnabling();
-                    break;
-                case WifiManager.WIFI_STATE_DISABLING:
-                    wifiLog("Disabling wifi");
-                    wifiStateListener.onWifiDisabling();
-                    break;
-                case WifiManager.WIFI_STATE_DISABLED:
-                    wifiLog("Wifi disabled");
-                    wifiStateListener.onWifiDisabled();
-                    break;
-
-            }
-
-        }
     }
 
     private void wifiLog(String text) {
