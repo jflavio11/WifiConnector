@@ -24,4 +24,6 @@ public interface WifiConnectorModel {
 
     void disconnectFromAccessPoint();
 
+    void destroyWifiConnectorListeners();
+
 }
