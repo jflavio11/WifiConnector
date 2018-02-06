@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Created by Jose Flavio on 2/5/18 7:43 PM.
+  ~ Copyright (c) 2017 JoseFlavio.
+  ~ All rights reserved.
+  -->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    android:layout_marginBottom="10dp"
+    >
+
+    <TextView
+        android:id="@+id/apItem_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dp"
+        android:textSize="18sp"
+        tools:text="My Cool Wifi"/>
+
+    <TextView
+        android:id="@+id/apItem_intensity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/apItem_name"
+        android:layout_alignBottom="@+id/apItem_name"
+        android:layout_marginStart="25dp"
+        android:layout_toEndOf="@+id/apItem_name"
+        android:textSize="18sp"
+        tools:text="55%"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1.3dp"
+        android:layout_below="@id/apItem_intensity"
+        android:layout_marginTop="10dp"
+        android:background="@color/colorAccent"/>
+
+</RelativeLayout>
