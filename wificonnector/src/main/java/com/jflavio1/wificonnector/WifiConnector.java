@@ -10,17 +10,12 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.jflavio1.wificonnector.interfaces.ConnectionResultListener;
 import com.jflavio1.wificonnector.interfaces.RemoveWifiListener;
 import com.jflavio1.wificonnector.interfaces.ShowWifiListener;
 import com.jflavio1.wificonnector.interfaces.WifiStateListener;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -188,7 +183,7 @@ public class WifiConnector {
         this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
     }
 
-    public WifiConnector(Context context, ScanResult scanResult, @Nullable String password) {
+    public WifiConnector(Context context, ScanResult scanResult, String password) {
         this.context = context;
         this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         setWifiConfiguration(scanResult.SSID, scanResult.BSSID, getWifiSecurityType(scanResult), password);
@@ -200,7 +195,7 @@ public class WifiConnector {
         this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
     }
 
-    public WifiConnector(Context context, String SSID, @Nullable String BSSID, String securityType, @Nullable String password) {
+    public WifiConnector(Context context, String SSID, String BSSID, String securityType, String password) {
         this.context = context;
         this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         setWifiConfiguration(SSID, BSSID, securityType, password);
@@ -639,7 +634,7 @@ public class WifiConnector {
         removeWifiNetwork(wifiConfiguration.SSID, wifiConfiguration.BSSID);
     }
 
-    public void removeWifiNetwork(String SSID, @Nullable String BSSID, RemoveWifiListener removeWifiListener) {
+    public void removeWifiNetwork(String SSID, String BSSID, RemoveWifiListener removeWifiListener) {
         this.removeWifiListener = removeWifiListener;
         removeWifiNetwork(SSID, BSSID);
     }
