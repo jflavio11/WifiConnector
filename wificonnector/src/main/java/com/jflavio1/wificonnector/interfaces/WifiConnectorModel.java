@@ -20,7 +20,7 @@ public interface WifiConnectorModel {
 
     void scanForWifiNetworks();
 
-    void connectToWifiAccessPoint(ScanResult scanResult);
+    void connectToWifiAccessPoint(ScanResult scanResult, String password);
 
     void disconnectFromAccessPoint();
 
