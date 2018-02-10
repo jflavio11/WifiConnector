@@ -22,7 +22,7 @@ public interface WifiConnectorModel {
 
     void connectToWifiAccessPoint(ScanResult scanResult, String password);
 
-    void disconnectFromAccessPoint();
+    void disconnectFromAccessPoint(ScanResult scanResult);
 
     void destroyWifiConnectorListeners();
 
