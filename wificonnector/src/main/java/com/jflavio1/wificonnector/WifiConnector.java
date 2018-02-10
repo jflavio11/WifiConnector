@@ -644,6 +644,7 @@ public class WifiConnector {
         removeWifiNetwork(scanResult.SSID, scanResult.BSSID);
     }
 
+    // TODO show reason to remove failure!
     private void removeWifiNetwork(String SSID, String BSSID) {
         List<WifiConfiguration> list1 = wifiManager.getConfiguredNetworks();
         if (list1 != null && list1.size() > 0) {
