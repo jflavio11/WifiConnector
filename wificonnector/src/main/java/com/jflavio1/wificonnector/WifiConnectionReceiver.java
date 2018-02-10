@@ -22,8 +22,15 @@ class WifiConnectionReceiver extends BroadcastReceiver {
 
     private WifiConnector wifiConnector;
 
+    private String ssidAttempt, bssidAttempt;
+
     public WifiConnectionReceiver(WifiConnector wifiConnector) {
         this.wifiConnector = wifiConnector;
+    }
+
+    public void setWifiInfoAttempt(String ssid, String bssid){
+        this.ssidAttempt = ssid;
+        this.bssidAttempt = bssid;
     }
 
     @Override
@@ -42,10 +49,10 @@ class WifiConnectionReceiver extends BroadcastReceiver {
                 case COMPLETED:
                     wifiLog("Connection to Wifi was successfuly completed...\n" +
                             "Connected to BSSID: " + wifiConnector.getWifiManager().getConnectionInfo().getBSSID() +
-                            "And SSID: " + wifiConnector.getWifiManager().getConnectionInfo().getSSID());
+                            " And SSID: " + wifiConnector.getWifiManager().getConnectionInfo().getSSID());
                     if (wifiConnector.getWifiManager().getConnectionInfo().getBSSID() != null) {
-                        wifiConnector.setCurrentWifiSSID(wifiConnector.getWifiManager().getConnectionInfo().getSSID());
-                        wifiConnector.setCurrentWifiBSSID(wifiConnector.getWifiManager().getConnectionInfo().getBSSID());
+                        wifiConnector.setCurrentWifiSSID(this.ssidAttempt);
+                        wifiConnector.setCurrentWifiBSSID(this.bssidAttempt);
                         wifiConnector.getConnectionResultListener().successfulConnect(wifiConnector.getCurrentWifiSSID());
                         wifiConnector.unregisterWifiConnectionListener();
                     }
@@ -64,6 +71,7 @@ class WifiConnectionReceiver extends BroadcastReceiver {
                         } else {
                             wifiConnector.getConnectionResultListener().errorConnect(WifiConnector.UNKOWN_ERROR);
                         }
+                        setWifiInfoAttempt(null, null);
                         wifiConnector.unregisterWifiConnectionListener();
                     }
                     break;
