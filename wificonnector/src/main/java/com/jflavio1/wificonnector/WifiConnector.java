@@ -201,6 +201,10 @@ public class WifiConnector {
         setWifiConfiguration(SSID, BSSID, securityType, password);
     }
 
+    public void setScanResult(ScanResult scanResult, String password) {
+        setWifiConfiguration(scanResult.SSID, scanResult.BSSID, getWifiSecurityType(scanResult), password);
+    }
+
     public void setWifiConfiguration(String SSID, String BSSID, String securityType, String password) {
         this.wifiConfiguration = new WifiConfiguration();
         this.wifiConfiguration.SSID = SSID;
@@ -311,9 +315,10 @@ public class WifiConnector {
      */
     public synchronized void unregisterShowWifiListListener() {
         try {
+            this.showWifiListListener = null;
             context.getApplicationContext().unregisterReceiver(showWifiListReceiver);
         } catch (Exception e) {
-            wifiLog("Error unregistering Wifi List Listener because may be it was never registered");
+            wifiLog("Error unregistering Wifi List Listener because may be it was never registered ");
         }
     }
 
@@ -368,20 +373,45 @@ public class WifiConnector {
     /**
      * For enabling wifi
      * If you want to listen wifi states, should call {@link #registerWifiStateListener(WifiStateListener)} and wait for
-     * callback to update User Interface of your application
+     * callback to update User Interface of your application.
+     * <p>
+     * We call {@link #createWifiConnectionBroadcastListener()} to determine using {@link WifiConnectionReceiver} if we are connected to
+     * any wifi network.
      *
      * @return this WifiConnector object for being used in any register callback method.
      */
     public WifiConnector enableWifi() {
         if (!wifiManager.isWifiEnabled()) {
-            wifiLog("Wifi was not enable, enabling it...");
             wifiManager.setWifiEnabled(true);
-            this.currentWifiSSID = wifiManager.getConnectionInfo().getSSID();
-            this.currentWifiBSSID = wifiManager.getConnectionInfo().getBSSID();
+            wifiLog("Wifi enabled, determining current connected wifi network if there is one...");
+            setInitWifiInformation();
         } else {
             wifiLog("Wifi is already enable...");
         }
         return this;
+    }
+
+    /**
+     * Just for having information about a current network if connected when wifi is enabled.
+     */
+    private void setInitWifiInformation() {
+        connectionResultListener = new ConnectionResultListener() {
+            @Override
+            public void successfulConnect(String SSID) {
+
+            }
+
+            @Override
+            public void errorConnect(int codeReason) {
+
+            }
+
+            @Override
+            public void onStateChange(SupplicantState supplicantState) {
+
+            }
+        };
+        createWifiConnectionBroadcastListener();
     }
 
     private void createWifiStateBroadcast() {
@@ -535,8 +565,12 @@ public class WifiConnector {
                         "Now trying to connect to " + wifiConfiguration.SSID);
             }
             connectToWifi();
-            wifiManager.reconnect();
         }
+    }
+
+    public void setConnectionResultListener(ConnectionResultListener connectionResultListener) {
+        this.connectionResultListener = connectionResultListener;
+        createWifiConnectionBroadcastListener();
     }
 
     /**
@@ -554,7 +588,6 @@ public class WifiConnector {
                         "Now trying to connect to " + wifiConfiguration.SSID);
             }
             connectToWifiAccesPoint();
-            wifiManager.reconnect();
         }
     }
 
@@ -571,7 +604,6 @@ public class WifiConnector {
         wifiLog("network id found: " + networkId);
         if (networkId == -1) {
             networkId = wifiManager.addNetwork(wifiConfiguration);
-            this.wifiConnectionReceiver.setWifiInfoAttempt(wifiConfiguration.SSID, wifiConfiguration.BSSID);
             wifiLog("networkId now: " + networkId);
         }
         return enableNetwork(networkId);
@@ -651,7 +683,7 @@ public class WifiConnector {
         if (list1 != null && list1.size() > 0) {
             for (WifiConfiguration i : list1) {
                 try {
-                    if (SSID.equals(currentWifiBSSID) || BSSID.equals(getCurrentWifiBSSID())) {
+                    if (SSID.equals(getCurrentWifiSSID()) || BSSID.equals(getCurrentWifiBSSID())) {
                         if (wifiManager.removeNetwork(i.networkId)) {
                             wifiLog("Network deleted: " + i.networkId + " " + i.SSID);
                             removeWifiListener.onWifiNetworkRemoved();

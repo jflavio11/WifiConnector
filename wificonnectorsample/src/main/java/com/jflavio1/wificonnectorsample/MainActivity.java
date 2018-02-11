@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.wifi.ScanResult;
+import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.provider.Settings;
@@ -22,6 +23,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -30,6 +32,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jflavio1.wificonnector.WifiConnector;
+import com.jflavio1.wificonnector.interfaces.ConnectionResultListener;
+import com.jflavio1.wificonnector.interfaces.RemoveWifiListener;
 import com.jflavio1.wificonnector.interfaces.ShowWifiListener;
 import com.jflavio1.wificonnector.interfaces.WifiConnectorModel;
 import com.jflavio1.wificonnector.interfaces.WifiStateListener;
@@ -62,13 +66,19 @@ public class MainActivity extends AppCompatActivity implements WifiConnectorMode
         adapter = new WifiListRvAdapter(new WifiListRvAdapter.WifiItemListener() {
             @Override
             public void onWifiItemClicked(ScanResult scanResult) {
-                connectToWifiAccessPoint(scanResult);
+                openConnectDialog(scanResult);
+            }
+
+            @Override
+            public void onWifiItemLongClick(ScanResult scanResult) {
+                disconnectFromAccessPoint(scanResult);
             }
         });
         rv.setAdapter(adapter);
         rv.setLayoutManager(new LinearLayoutManager(this));
         rv.setHasFixedSize(true);
         createWifiConnectorObject();
+
     }
 
     @Override
@@ -80,17 +90,7 @@ public class MainActivity extends AppCompatActivity implements WifiConnectorMode
     @Override
     public void createWifiConnectorObject() {
         wifiConnector = new WifiConnector(this);
-        mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    wifiConnector.enableWifi();
-                } else {
-                    wifiConnector.disableWifi();
-                }
-            }
-        });
-
+        wifiConnector.setLog(true);
         wifiConnector.registerWifiStateListener(new WifiStateListener() {
             @Override
             public void onStateChange(int wifiState) {
@@ -99,12 +99,7 @@ public class MainActivity extends AppCompatActivity implements WifiConnectorMode
 
             @Override
             public void onWifiEnabled() {
-                mWifiActiveTxtView.setText("Disable Wifi");
-                if (permisionLocationOn()) {
-                    scanForWifiNetworks();
-                } else {
-                    checkLocationTurnOn();
-                }
+                MainActivity.this.onWifiEnabled();
             }
 
             @Override
@@ -119,10 +114,43 @@ public class MainActivity extends AppCompatActivity implements WifiConnectorMode
 
             @Override
             public void onWifiDisabled() {
-                mWifiActiveTxtView.setText("Enable Wifi");
-                adapter.setScanResultList(new ArrayList<ScanResult>());
+                MainActivity.this.onWifiDisabled();
             }
         });
+
+        if(wifiConnector.isWifiEnbled()){
+            mSwitch.setChecked(true);
+            onWifiEnabled();
+        } else {
+            mSwitch.setChecked(false);
+            onWifiDisabled();
+        }
+
+        mSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    wifiConnector.enableWifi();
+                } else {
+                    wifiConnector.disableWifi();
+                }
+            }
+        });
+
+    }
+
+    private void onWifiEnabled(){
+        mWifiActiveTxtView.setText("Disable Wifi");
+        if (permisionLocationOn()) {
+            scanForWifiNetworks();
+        } else {
+            checkLocationTurnOn();
+        }
+    }
+
+    private void onWifiDisabled(){
+        mWifiActiveTxtView.setText("Enable Wifi");
+        adapter.setScanResultList(new ArrayList<ScanResult>());
     }
 
     @Override
@@ -145,14 +173,53 @@ public class MainActivity extends AppCompatActivity implements WifiConnectorMode
         });
     }
 
-    @Override
-    public void connectToWifiAccessPoint(ScanResult scanResult) {
-
+    public void openConnectDialog(ScanResult scanResult){
+        ConnectToWifiDialog dialog = new ConnectToWifiDialog(MainActivity.this, scanResult);
+        dialog.setConnectButtonListener(new ConnectToWifiDialog.DialogListener() {
+            @Override
+            public void onConnectClicked(ScanResult scanResult, String password) {
+                connectToWifiAccessPoint(scanResult, password);
+            }
+        });
+        dialog.show();
     }
 
     @Override
-    public void disconnectFromAccessPoint() {
+    public void connectToWifiAccessPoint(final ScanResult scanResult, String password) {
+        this.wifiConnector.setScanResult(scanResult, password);
+        this.wifiConnector.setLog(true);
+        this.wifiConnector.connectToWifi(new ConnectionResultListener() {
+            @Override
+            public void successfulConnect(String SSID) {
+                Toast.makeText(MainActivity.this, "You are connected to " + scanResult.SSID + "!!", Toast.LENGTH_SHORT).show();
+            }
 
+            @Override
+            public void errorConnect(int codeReason) {
+                Toast.makeText(MainActivity.this, "Error on connecting to wifi: " + scanResult.SSID +"\nError code: "+ codeReason,
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onStateChange(SupplicantState supplicantState) {
+
+            }
+        });
+    }
+
+    @Override
+    public void disconnectFromAccessPoint(ScanResult scanResult) {
+        this.wifiConnector.removeWifiNetwork(scanResult, new RemoveWifiListener() {
+            @Override
+            public void onWifiNetworkRemoved() {
+                Toast.makeText(MainActivity.this, "You have removed this wifi!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onWifiNetworkRemoveError() {
+                Toast.makeText(MainActivity.this, "Error on removing this network!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override

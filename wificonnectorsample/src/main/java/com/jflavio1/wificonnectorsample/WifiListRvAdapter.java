@@ -52,6 +52,14 @@ public class WifiListRvAdapter extends RecyclerView.Adapter<WifiListRvAdapter.Wi
                 wifiItemListener.onWifiItemClicked(scanResultList.get(position));
             }
         });
+
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                wifiItemListener.onWifiItemLongClick(scanResultList.get(position));
+                return true;
+            }
+        });
     }
 
     @Override
@@ -59,7 +67,7 @@ public class WifiListRvAdapter extends RecyclerView.Adapter<WifiListRvAdapter.Wi
         return this.scanResultList.size();
     }
 
-    static class WifiItem extends RecyclerView.ViewHolder{
+    static class WifiItem extends RecyclerView.ViewHolder {
 
         private TextView wifiName;
         private TextView wifiIntensity;
@@ -71,7 +79,7 @@ public class WifiListRvAdapter extends RecyclerView.Adapter<WifiListRvAdapter.Wi
         }
 
         @SuppressLint("SetTextI18n")
-        public void fill(ScanResult scanResult){
+        public void fill(ScanResult scanResult) {
             wifiName.setText(scanResult.SSID);
             wifiIntensity.setText(WifiManager.calculateSignalLevel(scanResult.level, 100) + "%");
         }
@@ -80,6 +88,8 @@ public class WifiListRvAdapter extends RecyclerView.Adapter<WifiListRvAdapter.Wi
 
     interface WifiItemListener {
         void onWifiItemClicked(ScanResult scanResult);
+
+        void onWifiItemLongClick(ScanResult scanResult);
     }
 
 }
