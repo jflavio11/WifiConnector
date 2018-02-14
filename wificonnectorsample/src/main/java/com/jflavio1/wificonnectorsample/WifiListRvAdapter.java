@@ -7,6 +7,7 @@
 package com.jflavio1.wificonnectorsample;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.support.v7.widget.RecyclerView;
@@ -14,6 +15,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.jflavio1.wificonnector.WifiConnector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +31,11 @@ import java.util.List;
 public class WifiListRvAdapter extends RecyclerView.Adapter<WifiListRvAdapter.WifiItem> {
 
     private List<ScanResult> scanResultList = new ArrayList<>();
+    private WifiConnector wifiConnector;
     private WifiItemListener wifiItemListener;
 
-    public WifiListRvAdapter(WifiItemListener wifiItemListener) {
+    public WifiListRvAdapter(WifiConnector wifiConnector, WifiItemListener wifiItemListener) {
+        this.wifiConnector = wifiConnector;
         this.wifiItemListener = wifiItemListener;
     }
 
@@ -44,12 +50,16 @@ public class WifiListRvAdapter extends RecyclerView.Adapter<WifiListRvAdapter.Wi
     }
 
     @Override
-    public void onBindViewHolder(WifiItem holder, final int position) {
-        holder.fill(scanResultList.get(position));
+    public void onBindViewHolder(final WifiItem holder, final int position) {
+        holder.fill(scanResultList.get(position), wifiConnector.getCurrentWifiSSID());
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                wifiItemListener.onWifiItemClicked(scanResultList.get(position));
+                if (wifiConnector.isConnectedToBSSID(scanResultList.get(position).BSSID)) {
+                    Toast.makeText(holder.itemView.getContext(), "Already connected!", Toast.LENGTH_SHORT).show();
+                } else {
+                    wifiItemListener.onWifiItemClicked(scanResultList.get(position));
+                }
             }
         });
 
@@ -67,6 +77,12 @@ public class WifiListRvAdapter extends RecyclerView.Adapter<WifiListRvAdapter.Wi
         return this.scanResultList.size();
     }
 
+    @Override
+    public void onViewRecycled(WifiItem holder) {
+        super.onViewRecycled(holder);
+        holder.wifiName.setTextColor(Color.BLACK);
+    }
+
     static class WifiItem extends RecyclerView.ViewHolder {
 
         private TextView wifiName;
@@ -79,7 +95,10 @@ public class WifiListRvAdapter extends RecyclerView.Adapter<WifiListRvAdapter.Wi
         }
 
         @SuppressLint("SetTextI18n")
-        public void fill(ScanResult scanResult) {
+        public void fill(ScanResult scanResult, String currentSsid) {
+            if (scanResult.SSID.equals(currentSsid)) {
+                wifiName.setTextColor(Color.GREEN);
+            }
             wifiName.setText(scanResult.SSID);
             wifiIntensity.setText(WifiManager.calculateSignalLevel(scanResult.level, 100) + "%");
         }
