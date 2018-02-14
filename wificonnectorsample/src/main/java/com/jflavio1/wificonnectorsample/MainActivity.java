@@ -62,21 +62,6 @@ public class MainActivity extends AppCompatActivity implements WifiConnectorMode
         rv = findViewById(R.id.wifiRv);
 
         setLocationPermission();
-
-        adapter = new WifiListRvAdapter(new WifiListRvAdapter.WifiItemListener() {
-            @Override
-            public void onWifiItemClicked(ScanResult scanResult) {
-                openConnectDialog(scanResult);
-            }
-
-            @Override
-            public void onWifiItemLongClick(ScanResult scanResult) {
-                disconnectFromAccessPoint(scanResult);
-            }
-        });
-        rv.setAdapter(adapter);
-        rv.setLayoutManager(new LinearLayoutManager(this));
-        rv.setHasFixedSize(true);
         createWifiConnectorObject();
 
     }
@@ -136,6 +121,21 @@ public class MainActivity extends AppCompatActivity implements WifiConnectorMode
                 }
             }
         });
+
+        adapter = new WifiListRvAdapter(this.wifiConnector, new WifiListRvAdapter.WifiItemListener() {
+            @Override
+            public void onWifiItemClicked(ScanResult scanResult) {
+                openConnectDialog(scanResult);
+            }
+
+            @Override
+            public void onWifiItemLongClick(ScanResult scanResult) {
+                disconnectFromAccessPoint(scanResult);
+            }
+        });
+        rv.setAdapter(adapter);
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        rv.setHasFixedSize(true);
 
     }
 
