@@ -157,17 +157,17 @@ public class WifiConnector {
     /**
      * String value for current connected Wi-Fi network
      */
-    public String currentWifiSSID = null;
+    private String currentWifiSSID = null;
 
     /**
-     * static value to be accesed from anywhere
+     * Static value to be acceded from anywhere
      */
     public static String CURRENT_WIFI = null;
 
     /**
      * String value for current connected Wi-Fi network
      */
-    public String currentWifiBSSID = null;
+    private String currentWifiBSSID = null;
 
     @Deprecated
     public WifiConnector(Context context, boolean enableWifi) {
