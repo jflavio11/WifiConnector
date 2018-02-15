@@ -1,1 +1,1 @@
-include ':wificonnector'
+include ':wificonnector', ':wificonnectorsample'

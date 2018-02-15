@@ -23,7 +23,7 @@
 * And add the dependency:
 
 	```
-	compile 'com.github.jflavio1:WifiConnector:v1.6'
+	compile 'com.github.jflavio1:WifiConnector:v1.7'
 	```
 
 #### Using Maven
@@ -43,7 +43,7 @@
 	<dependency>
 		<groupId>com.github.jflavio1</groupId>
 		<artifactId>WifiConnector</artifactId>
-		<version>v1.6</version>
+		<version>v1.7</version>
 	</dependency>
 	```
 
@@ -140,14 +140,18 @@ Remember, you have to put these permissions on your Manifest:
 ```
 <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 ```
+
+And the location services must be turned on!!
 
 All tests and suggestions are well received.
 
 ---
 ### License
 
-Copyright © 2017 JoseFlavio.
+Copyright © 2018 JoseFlavio.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

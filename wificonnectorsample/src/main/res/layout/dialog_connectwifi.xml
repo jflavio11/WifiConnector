@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Created by Jose Flavio on 2/10/18 4:39 PM.
+  ~ Copyright (c) 2017 JoseFlavio.
+  ~ All rights reserved.
+  -->
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:padding="7dp">
+
+    <TextView
+        android:id="@+id/dialog_wifiname"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:textSize="18sp"
+        tools:text="wifi Access point"/>
+
+    <TextView
+        android:id="@+id/dialog_security"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/dialog_wifiname"
+        android:layout_centerHorizontal="true"
+        tools:text="Security: WPA2"/>
+
+    <EditText
+        android:id="@+id/dialog_et"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/dialog_security"
+        android:hint="*******************"
+        android:visibility="visible"/>
+
+    <Button
+        android:id="@+id/dialog_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/dialog_et"
+        android:layout_centerHorizontal="true"
+        android:text="Connect!"/>
+
+</RelativeLayout>
