@@ -79,8 +79,8 @@
                 
             }
         })
-		// and register wifi connection listener
-		.registerWifiConnectionListener(new ConnectionResultListener() {
+	// and register wifi connection listener
+	.registerWifiConnectionListener(new ConnectionResultListener() {
             @Override
             public void successfulConnect(String SSID) {
                 Log.d("MyTag", "Success connecting to Access Point " + SSID);
@@ -96,16 +96,16 @@
                 
             }
         })
-		// and after register all listeners you want, you sould enable wifi and connect to the access point
-		.enableWifi().connectToWifi();
+	// and after register all listeners you want, you sould enable wifi and connect to the access point
+	.enableWifi().connectToWifi();
 	
 		
-		**OR SIMPLY**
-		WifiConnector connector = new WifiConnector(this, "NEW_SSID", "NEW_BSSID", "WEP", "wifiPassword");
+	**OR SIMPLY**
+	WifiConnector connector = new WifiConnector(this, "NEW_SSID", "NEW_BSSID", "WEP", "wifiPassword");
 		
-		connector.enableWifi();
+	connector.enableWifi();
 		
-		connector.connectToWifi(new ConnectionResultListener() {
+	connector.connectToWifi(new ConnectionResultListener() {
             @Override
             public void successfulConnect(String SSID) {
                 
@@ -131,7 +131,6 @@
 
 
 ### Important!
-**WifiConnector instance must be implemented on Service or IntentService**
 
 **Since 1.4 enableWifi() method is not on constructors anymore, you must call it explicity**
 Since 1.2-beta1 listeners are not inside WifiConnector class, so you must call them as a single class.
