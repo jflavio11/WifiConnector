@@ -143,7 +143,7 @@ Remember, you have to put these permissions on your Manifest:
 <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 ```
 
-And the location services must be turned on!!
+And location services must be turned on!!
 
 All tests and suggestions are well received.
 
