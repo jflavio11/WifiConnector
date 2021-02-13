@@ -32,12 +32,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.jflavio1.wificonnector.WifiConnector;
+import com.jflavio1.wificonnector.WifiConnector2;
 import com.jflavio1.wificonnector.interfaces.ConnectionResultListener;
 import com.jflavio1.wificonnector.interfaces.RemoveWifiListener;
 import com.jflavio1.wificonnector.interfaces.ShowWifiListener;
 import com.jflavio1.wificonnector.interfaces.WifiConnectorModel;
 import com.jflavio1.wificonnector.interfaces.WifiStateListener;
 
+import com.jflavio1.wificonnector.model.WiFiHotSpot;
+import com.jflavio1.wificonnector.model.WiFiSecurityType;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
@@ -62,7 +65,11 @@ public class MainActivity extends AppCompatActivity implements WifiConnectorMode
         rv = findViewById(R.id.wifiRv);
 
         setLocationPermission();
-        createWifiConnectorObject();
+        // createWifiConnectorObject();
+        WifiConnector2 wf = new WifiConnector2(this);
+        wf.connectToWiFiHotSpot(
+                new WiFiHotSpot("flavioxs", "", "abc123456", WiFiSecurityType.WPA2.INSTANCE, false)
+        );
 
     }
 

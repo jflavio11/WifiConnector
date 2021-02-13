@@ -146,7 +146,7 @@ public class WifiConnector {
      */
     private static final String SECURITY_WEP = "WEP";
     private static final String SECURITY_WPA = "WPA";
-    private static final String SECURITY_PSK = "PSK";
+    private static final String SECURITY_PSK = "WPA2_PSK";
     private static final String SECURITY_EAP = "EAP";
 
     /**
@@ -764,7 +764,7 @@ public class WifiConnector {
             return SECURITY_WEP;
         } else if (result.capabilities.contains("WPA")) {
             return SECURITY_WPA;
-        } else if (result.capabilities.contains("PSK")) {
+        } else if (result.capabilities.contains("WPA2_PSK")) {
             return SECURITY_PSK;
         } else if (result.capabilities.contains("EAP")) {
             return SECURITY_EAP;
