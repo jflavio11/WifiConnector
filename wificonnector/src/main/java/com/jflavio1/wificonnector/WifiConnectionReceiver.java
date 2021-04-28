@@ -59,12 +59,11 @@ class WifiConnectionReceiver extends BroadcastReceiver {
                     // only remove broadcast listener if error was ERROR_AUTHENTICATING
                     if (supl_error == WifiManager.ERROR_AUTHENTICATING) {
                         wifiLog("Authentication error...");
-                        if (wifiConnector.deleteWifiConf()) {
-                            wifiConnector.getConnectionResultListener().errorConnect(WifiConnector.AUTHENTICATION_ERROR);
-                        } else {
-                            wifiConnector.getConnectionResultListener().errorConnect(WifiConnector.UNKOWN_ERROR);
-                        }
+                        wifiConnector.deleteWifiConf();
+                        wifiConnector.getConnectionResultListener().errorConnect(WifiConnector.AUTHENTICATION_ERROR);
                         wifiConnector.unregisterWifiConnectionListener();
+                    }else{
+                        wifiLog("Other error..." + supl_error);
                     }
                     break;
 
