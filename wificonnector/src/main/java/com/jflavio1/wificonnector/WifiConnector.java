@@ -739,7 +739,7 @@ public class WifiConnector {
         try {
             confList = wifiManager.getConfiguredNetworks();
             for (WifiConfiguration i : confList) {
-                if (i.SSID != null && i.SSID.equals(ssidFormat(wifiConfiguration.SSID))) {
+                if (i.SSID != null && i.SSID.equals(wifiConfiguration.SSID)) {
                     wifiLog("Deleting wifi configuration: " + i.SSID);
                     wifiManager.removeNetwork(i.networkId);
                     return wifiManager.saveConfiguration();
