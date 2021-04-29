@@ -285,6 +285,7 @@ public class WifiConnector {
     public synchronized void unregisterWifiConnectionListener() {
         try {
             context.getApplicationContext().unregisterReceiver(this.wifiConnectionReceiver);
+            wifiLog("unregisterWifiConnectionListener");
         } catch (Exception e) {
             wifiLog("Error unregistering Wifi Connection Listener because may be it was never registered");
         }
@@ -486,6 +487,7 @@ public class WifiConnector {
     }
 
     private void createWifiConnectionBroadcastListener() {
+        wifiLog("createWifiConnectionBroadcastListener");
         chooseWifiFilter = new IntentFilter();
         chooseWifiFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
         wifiConnectionReceiver = new WifiConnectionReceiver(this);
