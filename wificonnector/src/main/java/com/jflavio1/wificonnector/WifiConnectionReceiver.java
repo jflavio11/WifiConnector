@@ -61,7 +61,6 @@ class WifiConnectionReceiver extends BroadcastReceiver {
                         wifiLog("Authentication error...");
                         wifiConnector.deleteWifiConf();
                         wifiConnector.getConnectionResultListener().errorConnect(WifiConnector.AUTHENTICATION_ERROR);
-                        wifiConnector.unregisterWifiConnectionListener();
                     }else{
                         wifiLog("Other error..." + supl_error);
                     }

@@ -285,6 +285,7 @@ public class WifiConnector {
     public synchronized void unregisterWifiConnectionListener() {
         try {
             context.getApplicationContext().unregisterReceiver(this.wifiConnectionReceiver);
+            this.wifiConnectionReceiver = null;
             wifiLog("unregisterWifiConnectionListener");
         } catch (Exception e) {
             wifiLog("Error unregistering Wifi Connection Listener because may be it was never registered");
@@ -486,15 +487,19 @@ public class WifiConnector {
         this.wifiManager = wifiManager;
     }
 
-    private void createWifiConnectionBroadcastListener() {
-        wifiLog("createWifiConnectionBroadcastListener");
-        chooseWifiFilter = new IntentFilter();
-        chooseWifiFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-        wifiConnectionReceiver = new WifiConnectionReceiver(this);
-        try {
-            context.getApplicationContext().registerReceiver(wifiConnectionReceiver, chooseWifiFilter);
-        } catch (Exception e) {
-            wifiLog("Register broadcast error (Choose): " + e.toString());
+    private synchronized void createWifiConnectionBroadcastListener() {
+        if(wifiConnectionReceiver == null){
+            wifiLog("creating wifiConnectionReceiver");
+            chooseWifiFilter = new IntentFilter();
+            chooseWifiFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+            wifiConnectionReceiver = new WifiConnectionReceiver(this);
+            try {
+                context.getApplicationContext().registerReceiver(wifiConnectionReceiver, chooseWifiFilter);
+            } catch (Exception e) {
+                wifiLog("Register broadcast error (Choose): " + e.toString());
+            }
+        }else{
+            wifiLog("wifiConnectionReceiver already exists");
         }
     }
 
@@ -634,7 +639,6 @@ public class WifiConnector {
         if (networkId == -1) {
             wifiLog("So networkId still -1, there was an error... may be authentication?");
             connectionResultListener.errorConnect(AUTHENTICATION_ERROR);
-            unregisterWifiConnectionListener();
             return false;
         }
         return connectWifiManager(networkId);
