@@ -637,8 +637,8 @@ public class WifiConnector {
 
     private boolean enableNetwork(int networkId) {
         if (networkId == -1) {
-            wifiLog("So networkId still -1, there was an error... may be authentication?");
-            connectionResultListener.errorConnect(AUTHENTICATION_ERROR);
+            wifiLog("So networkId still -1, there was an error... likely incorrect SSID or security type");
+            connectionResultListener.errorConnect(NOT_FOUND_ERROR);
             return false;
         }
         return connectWifiManager(networkId);
