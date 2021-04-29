@@ -144,10 +144,10 @@ public class WifiConnector {
     /**
      * WIFI SECURITY TYPES
      */
-    private static final String SECURITY_WEP = "WEP";
-    private static final String SECURITY_WPA = "WPA";
-    private static final String SECURITY_PSK = "PSK";
-    private static final String SECURITY_EAP = "EAP";
+    public static final String SECURITY_WEP = "WEP";
+    public static final String SECURITY_WPA = "WPA";
+    public static final String SECURITY_PSK = "PSK";
+    public static final String SECURITY_EAP = "EAP";
 
     /**
      * for setting wifi access point security type
