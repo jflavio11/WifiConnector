@@ -205,10 +205,11 @@ public class WifiConnector {
         setWifiConfiguration(scanResult.SSID, scanResult.BSSID, getWifiSecurityType(scanResult), password);
     }
 
-    public void setWifiConfiguration(String SSID, String BSSID, String securityType, String password) {
+    public void setWifiConfiguration(String SSID, String BSSID, String securityType, String password, boolean hiddenSSID) {
         this.wifiConfiguration = new WifiConfiguration();
         this.wifiConfiguration.SSID = SSID;
         this.wifiConfiguration.BSSID = BSSID;
+        this.wifiConfiguration.hiddenSSID = hiddenSSID;
         if (securityType.equals(SECURITY_NONE)) {
             wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         } else {
