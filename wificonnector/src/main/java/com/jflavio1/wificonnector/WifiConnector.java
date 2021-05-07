@@ -186,7 +186,7 @@ public class WifiConnector {
     public WifiConnector(Context context, ScanResult scanResult, String password) {
         this.context = context;
         this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        setWifiConfiguration(scanResult.SSID, scanResult.BSSID, getWifiSecurityType(scanResult), password);
+        setWifiConfiguration(scanResult.SSID, scanResult.BSSID, getWifiSecurityType(scanResult), password, false);
     }
 
     public WifiConnector(WifiConfiguration wifiConfiguration, Context context) {
@@ -198,11 +198,11 @@ public class WifiConnector {
     public WifiConnector(Context context, String SSID, String BSSID, String securityType, String password) {
         this.context = context;
         this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        setWifiConfiguration(SSID, BSSID, securityType, password);
+        setWifiConfiguration(SSID, BSSID, securityType, password, false);
     }
 
     public void setScanResult(ScanResult scanResult, String password) {
-        setWifiConfiguration(scanResult.SSID, scanResult.BSSID, getWifiSecurityType(scanResult), password);
+        setWifiConfiguration(scanResult.SSID, scanResult.BSSID, getWifiSecurityType(scanResult), password, false);
     }
 
     public void setWifiConfiguration(String SSID, String BSSID, String securityType, String password, boolean hiddenSSID) {
