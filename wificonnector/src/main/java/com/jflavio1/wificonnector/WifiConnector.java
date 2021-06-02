@@ -212,6 +212,16 @@ public class WifiConnector {
         this.wifiConfiguration.hiddenSSID = hiddenSSID;
         if (securityType.equals(SECURITY_NONE)) {
             wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+        } else if (securityType.equals(SECURITY_WEP)) {
+            wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+            wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+            wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+            wifiConfiguration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
+            wifiConfiguration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
+            wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
+            wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
+            wifiConfiguration.wepKeys[0] = ssidFormat(password);
+            wifiConfiguration.wepTxKeyIndex = 0;
         } else {
             wifiConfiguration.preSharedKey = ssidFormat(password);
             wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
