@@ -1,15 +1,18 @@
 package com.jflavio1.wificonnector;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.util.Log;
 
 import com.jflavio1.wificonnector.interfaces.ConnectionResultListener;
@@ -148,6 +151,8 @@ public class WifiConnector {
     public static final String SECURITY_WPA = "WPA";
     public static final String SECURITY_PSK = "PSK";
     public static final String SECURITY_EAP = "EAP";
+    public static final String SECURITY_SAE = "SAE";
+    public static final String SECURITY_OWE = "OWE";
 
     /**
      * for setting wifi access point security type
@@ -210,29 +215,67 @@ public class WifiConnector {
         this.wifiConfiguration.SSID = SSID;
         this.wifiConfiguration.BSSID = BSSID;
         this.wifiConfiguration.hiddenSSID = hiddenSSID;
-        if (securityType.equals(SECURITY_NONE)) {
-            wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-        } else if (securityType.equals(SECURITY_WEP)) {
-            wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-            wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
-            wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
-            wifiConfiguration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-            wifiConfiguration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-            wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40);
-            wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP104);
-            wifiConfiguration.wepKeys[0] = ssidFormat(password);
-            wifiConfiguration.wepTxKeyIndex = 0;
-        } else {
-            wifiConfiguration.preSharedKey = ssidFormat(password);
-            wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
-            wifiConfiguration.allowedProtocols.set(WifiConfiguration.Protocol.WPA); // For WPA
-            wifiConfiguration.allowedProtocols.set(WifiConfiguration.Protocol.RSN); // For WPA2
-            wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-            wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
-            wifiConfiguration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-            wifiConfiguration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-            wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-            wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+
+        switch (securityType) {
+            case SECURITY_NONE:
+                wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                break;
+
+            case SECURITY_WEP:
+                wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+                wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+                setupWepKeys(password);
+                break;
+
+            case SECURITY_PSK:
+                wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+                setupWpaPreSharedKey(password);
+                break;
+
+            case SECURITY_EAP:
+                wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
+                wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
+                setupWpaPreSharedKey(password);
+                break;
+
+            case SECURITY_SAE:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    wifiConfiguration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_SAE);
+                    if (password != null && password.length() > 0) {
+                        wifiConfiguration.preSharedKey = '"' + password + '"';
+                    }
+                }
+                break;
+            case SECURITY_OWE:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    wifiConfiguration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_OWE);
+                }
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    private void setupWepKeys(String password) {
+        int length = password != null ? password.length() : 0;
+        if ((length == 10 || length == 26 || length == 58)
+                && password.matches("[0-9A-Fa-f]*")) {
+            wifiConfiguration.wepKeys[0] = password;
+        } else if (length != 0) {
+            wifiConfiguration.wepKeys[0] = '"' + password + '"';
+        }
+    }
+
+    private void setupWpaPreSharedKey(String password) {
+        int length = password != null ? password.length() : 0;
+        if (length != 0) {
+            if (password.matches("[0-9A-Fa-f]{64}")) {
+                wifiConfiguration.preSharedKey = password;
+            } else {
+                wifiConfiguration.preSharedKey = '"' + password + '"';
+            }
         }
     }
 
@@ -499,7 +542,7 @@ public class WifiConnector {
     }
 
     private synchronized void createWifiConnectionBroadcastListener() {
-        if(wifiConnectionReceiver == null){
+        if (wifiConnectionReceiver == null) {
             wifiLog("creating wifiConnectionReceiver");
             chooseWifiFilter = new IntentFilter();
             chooseWifiFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
@@ -509,7 +552,7 @@ public class WifiConnector {
             } catch (Exception e) {
                 wifiLog("Register broadcast error (Choose): " + e.toString());
             }
-        }else{
+        } else {
             wifiLog("wifiConnectionReceiver already exists");
         }
     }
@@ -728,7 +771,6 @@ public class WifiConnector {
      *
      * @param wifiManager current wifiManager
      * @param i           the wifiConfigured network to delete
-     * @hide
      */
     public void forgetWifiNetwork(WifiManager wifiManager, WifiConfiguration i) {
         try {
@@ -785,6 +827,10 @@ public class WifiConnector {
             return SECURITY_PSK;
         } else if (result.capabilities.contains("EAP")) {
             return SECURITY_EAP;
+        } else if (result.capabilities.contains("SAE")) {
+            return SECURITY_SAE;
+        } else if (result.capabilities.contains("OWE")) {
+            return SECURITY_OWE;
         }
         return SECURITY_NONE;
     }

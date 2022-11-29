@@ -1,0 +1,61 @@
+// ./gradlew clean build generateRelease
+apply plugin: 'maven-publish'
+
+def publishVersion = project.PUBLISH_VERSION
+
+def localReleaseDest = "${buildDir}/release/${publishVersion}"
+
+task androidJavadocs(type: Javadoc) {
+    failOnError = false
+    source = android.sourceSets.main.java.srcDirs
+    ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+    classpath += files(ext.androidJar)
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = 'javadoc'
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+afterEvaluate {
+    publishing{
+        publications{
+            release(MavenPublication){
+                groupId = "com.github.cs-chs"
+                artifactId = "WifiConnector"
+                version = publishVersion
+                // Applies the component for the release build variant
+                from components.release
+                // Adds javadocs and sources as separate jars.
+                artifact androidSourcesJar
+                artifact androidJavadocsJar
+            }
+        }
+    }
+}
+
+task zipRelease(type: Zip) {
+    from localReleaseDest
+    destinationDir buildDir
+    archiveName "release-${publishVersion}.zip"
+}
+
+task generateRelease {
+    doLast {
+        println "Release ${publishVersion} can be found at ${localReleaseDest}/"
+        println "Release ${publishVersion} zipped can be found ${buildDir}/release-${publishVersion}.zip"
+    }
+}
+
+generateRelease.dependsOn(zipRelease)
+
+
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
+}
