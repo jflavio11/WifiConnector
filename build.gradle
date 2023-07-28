@@ -32,7 +32,7 @@ task clean(type: Delete) {
 }
 
 ext {
-    PUBLISH_VERSION = '1.8.9-internal'
+    PUBLISH_VERSION = '1.8.10-internal'
     compileSdkVersion = 30
     bToolsVersion = "30.0.3"
     minSdk = 19

@@ -1,11 +1,10 @@
 package com.jflavio1.wificonnector;
 
-import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.ScanResult;
@@ -256,6 +255,10 @@ public class WifiConnector {
                 break;
         }
 
+    }
+
+    public void setWifiConfiguration(WifiConfiguration wifiConfiguration) {
+        this.wifiConfiguration = wifiConfiguration;
     }
 
     private void setupWepKeys(String password) {
@@ -677,6 +680,7 @@ public class WifiConnector {
      * @param SSID name of wifi network
      * @return wifi network id
      */
+    @SuppressLint("MissingPermission")
     private int getNetworkId(String SSID) {
         confList = wifiManager.getConfiguredNetworks();
         if (confList != null && confList.size() > 0) {
@@ -739,7 +743,7 @@ public class WifiConnector {
 
     // TODO show reason to remove failure!
     private void removeWifiNetwork(String SSID, String BSSID) {
-        List<WifiConfiguration> list1 = wifiManager.getConfiguredNetworks();
+        @SuppressLint("MissingPermission") List<WifiConfiguration> list1 = wifiManager.getConfiguredNetworks();
         if (list1 != null && list1.size() > 0) {
             for (WifiConfiguration i : list1) {
                 try {
@@ -794,6 +798,7 @@ public class WifiConnector {
      *
      * @return true if delete configuration was successful
      */
+    @SuppressLint("MissingPermission")
     boolean deleteWifiConf() {
         try {
             confList = wifiManager.getConfiguredNetworks();
