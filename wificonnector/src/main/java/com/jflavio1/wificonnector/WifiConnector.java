@@ -1,5 +1,6 @@
 package com.jflavio1.wificonnector;
 
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.util.Log;
 
 import com.jflavio1.wificonnector.interfaces.ConnectionResultListener;
@@ -144,10 +146,12 @@ public class WifiConnector {
     /**
      * WIFI SECURITY TYPES
      */
-    private static final String SECURITY_WEP = "WEP";
-    private static final String SECURITY_WPA = "WPA";
-    private static final String SECURITY_PSK = "PSK";
-    private static final String SECURITY_EAP = "EAP";
+    public static final String SECURITY_WEP = "WEP";
+    public static final String SECURITY_WPA = "WPA";
+    public static final String SECURITY_PSK = "PSK";
+    public static final String SECURITY_EAP = "EAP";
+    public static final String SECURITY_SAE = "SAE";
+    public static final String SECURITY_OWE = "OWE";
 
     /**
      * for setting wifi access point security type
@@ -186,7 +190,7 @@ public class WifiConnector {
     public WifiConnector(Context context, ScanResult scanResult, String password) {
         this.context = context;
         this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        setWifiConfiguration(scanResult.SSID, scanResult.BSSID, getWifiSecurityType(scanResult), password);
+        setWifiConfiguration(scanResult.SSID, scanResult.BSSID, getWifiSecurityType(scanResult), password, false);
     }
 
     public WifiConnector(WifiConfiguration wifiConfiguration, Context context) {
@@ -198,30 +202,83 @@ public class WifiConnector {
     public WifiConnector(Context context, String SSID, String BSSID, String securityType, String password) {
         this.context = context;
         this.wifiManager = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        setWifiConfiguration(SSID, BSSID, securityType, password);
+        setWifiConfiguration(SSID, BSSID, securityType, password, false);
     }
 
     public void setScanResult(ScanResult scanResult, String password) {
-        setWifiConfiguration(scanResult.SSID, scanResult.BSSID, getWifiSecurityType(scanResult), password);
+        setWifiConfiguration(scanResult.SSID, scanResult.BSSID, getWifiSecurityType(scanResult), password, false);
     }
 
-    public void setWifiConfiguration(String SSID, String BSSID, String securityType, String password) {
+    public void setWifiConfiguration(String SSID, String BSSID, String securityType, String password, boolean hiddenSSID) {
         this.wifiConfiguration = new WifiConfiguration();
         this.wifiConfiguration.SSID = SSID;
         this.wifiConfiguration.BSSID = BSSID;
-        if (securityType.equals(SECURITY_NONE)) {
-            wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
-        } else {
-            wifiConfiguration.preSharedKey = ssidFormat(password);
-            wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
-            wifiConfiguration.allowedProtocols.set(WifiConfiguration.Protocol.WPA); // For WPA
-            wifiConfiguration.allowedProtocols.set(WifiConfiguration.Protocol.RSN); // For WPA2
-            wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-            wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
-            wifiConfiguration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
-            wifiConfiguration.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-            wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
-            wifiConfiguration.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
+        this.wifiConfiguration.hiddenSSID = hiddenSSID;
+
+        switch (securityType) {
+            case SECURITY_NONE:
+                wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                break;
+
+            case SECURITY_WEP:
+                wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
+                wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
+                wifiConfiguration.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.SHARED);
+                setupWepKeys(password);
+                break;
+
+            case SECURITY_PSK:
+                wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
+                setupWpaPreSharedKey(password);
+                break;
+
+            case SECURITY_EAP:
+                wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_EAP);
+                wifiConfiguration.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.IEEE8021X);
+                setupWpaPreSharedKey(password);
+                break;
+
+            case SECURITY_SAE:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    wifiConfiguration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_SAE);
+                    if (password != null && password.length() > 0) {
+                        wifiConfiguration.preSharedKey = '"' + password + '"';
+                    }
+                }
+                break;
+            case SECURITY_OWE:
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    wifiConfiguration.setSecurityParams(WifiConfiguration.SECURITY_TYPE_OWE);
+                }
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    public void setWifiConfiguration(WifiConfiguration wifiConfiguration) {
+        this.wifiConfiguration = wifiConfiguration;
+    }
+
+    private void setupWepKeys(String password) {
+        int length = password != null ? password.length() : 0;
+        if ((length == 10 || length == 26 || length == 58)
+                && password.matches("[0-9A-Fa-f]*")) {
+            wifiConfiguration.wepKeys[0] = password;
+        } else if (length != 0) {
+            wifiConfiguration.wepKeys[0] = '"' + password + '"';
+        }
+    }
+
+    private void setupWpaPreSharedKey(String password) {
+        int length = password != null ? password.length() : 0;
+        if (length != 0) {
+            if (password.matches("[0-9A-Fa-f]{64}")) {
+                wifiConfiguration.preSharedKey = password;
+            } else {
+                wifiConfiguration.preSharedKey = '"' + password + '"';
+            }
         }
     }
 
@@ -285,6 +342,8 @@ public class WifiConnector {
     public synchronized void unregisterWifiConnectionListener() {
         try {
             context.getApplicationContext().unregisterReceiver(this.wifiConnectionReceiver);
+            this.wifiConnectionReceiver = null;
+            wifiLog("unregisterWifiConnectionListener");
         } catch (Exception e) {
             wifiLog("Error unregistering Wifi Connection Listener because may be it was never registered");
         }
@@ -485,14 +544,19 @@ public class WifiConnector {
         this.wifiManager = wifiManager;
     }
 
-    private void createWifiConnectionBroadcastListener() {
-        chooseWifiFilter = new IntentFilter();
-        chooseWifiFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
-        wifiConnectionReceiver = new WifiConnectionReceiver(this);
-        try {
-            context.getApplicationContext().registerReceiver(wifiConnectionReceiver, chooseWifiFilter);
-        } catch (Exception e) {
-            wifiLog("Register broadcast error (Choose): " + e.toString());
+    private synchronized void createWifiConnectionBroadcastListener() {
+        if (wifiConnectionReceiver == null) {
+            wifiLog("creating wifiConnectionReceiver");
+            chooseWifiFilter = new IntentFilter();
+            chooseWifiFilter.addAction(WifiManager.SUPPLICANT_STATE_CHANGED_ACTION);
+            wifiConnectionReceiver = new WifiConnectionReceiver(this);
+            try {
+                context.getApplicationContext().registerReceiver(wifiConnectionReceiver, chooseWifiFilter);
+            } catch (Exception e) {
+                wifiLog("Register broadcast error (Choose): " + e.toString());
+            }
+        } else {
+            wifiLog("wifiConnectionReceiver already exists");
         }
     }
 
@@ -616,6 +680,7 @@ public class WifiConnector {
      * @param SSID name of wifi network
      * @return wifi network id
      */
+    @SuppressLint("MissingPermission")
     private int getNetworkId(String SSID) {
         confList = wifiManager.getConfiguredNetworks();
         if (confList != null && confList.size() > 0) {
@@ -630,9 +695,8 @@ public class WifiConnector {
 
     private boolean enableNetwork(int networkId) {
         if (networkId == -1) {
-            wifiLog("So networkId still -1, there was an error... may be authentication?");
-            connectionResultListener.errorConnect(AUTHENTICATION_ERROR);
-            unregisterWifiConnectionListener();
+            wifiLog("So networkId still -1, there was an error... likely incorrect SSID or security type");
+            connectionResultListener.errorConnect(NOT_FOUND_ERROR);
             return false;
         }
         return connectWifiManager(networkId);
@@ -679,7 +743,7 @@ public class WifiConnector {
 
     // TODO show reason to remove failure!
     private void removeWifiNetwork(String SSID, String BSSID) {
-        List<WifiConfiguration> list1 = wifiManager.getConfiguredNetworks();
+        @SuppressLint("MissingPermission") List<WifiConfiguration> list1 = wifiManager.getConfiguredNetworks();
         if (list1 != null && list1.size() > 0) {
             for (WifiConfiguration i : list1) {
                 try {
@@ -711,7 +775,6 @@ public class WifiConnector {
      *
      * @param wifiManager current wifiManager
      * @param i           the wifiConfigured network to delete
-     * @hide
      */
     public void forgetWifiNetwork(WifiManager wifiManager, WifiConfiguration i) {
         try {
@@ -735,11 +798,12 @@ public class WifiConnector {
      *
      * @return true if delete configuration was successful
      */
+    @SuppressLint("MissingPermission")
     boolean deleteWifiConf() {
         try {
             confList = wifiManager.getConfiguredNetworks();
             for (WifiConfiguration i : confList) {
-                if (i.SSID != null && i.SSID.equals(ssidFormat(wifiConfiguration.SSID))) {
+                if (i.SSID != null && i.SSID.equals(wifiConfiguration.SSID)) {
                     wifiLog("Deleting wifi configuration: " + i.SSID);
                     wifiManager.removeNetwork(i.networkId);
                     return wifiManager.saveConfiguration();
@@ -768,6 +832,10 @@ public class WifiConnector {
             return SECURITY_PSK;
         } else if (result.capabilities.contains("EAP")) {
             return SECURITY_EAP;
+        } else if (result.capabilities.contains("SAE")) {
+            return SECURITY_SAE;
+        } else if (result.capabilities.contains("OWE")) {
+            return SECURITY_OWE;
         }
         return SECURITY_NONE;
     }
